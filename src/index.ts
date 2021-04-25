@@ -1,11 +1,26 @@
-import { serve } from "https://deno.land/std@0.93.0/http/server.ts";
+import { App } from "./app.ts";
+import { client } from "./db.ts";
 
-const server = serve({ hostname: "0.0.0.0", port: 8080 });
-console.log(`HTTP webserver running.  Access it at:  http://localhost:8080/`);
+const PORT = 8080;
 
-for await (const request of server) {
-  let bodyContent = "Your user-agent is:\n\n";
-  bodyContent += request.headers.get("user-agent") || "Unknown";
+const app = new App(PORT);
 
-  request.respond({ status: 200, body: bodyContent });
-}
+app.use(() => {
+  console.log("This is a middleware");
+});
+
+app.get("/helloWorld", (_req, res) => {
+  res.send("Hello World");
+});
+
+app.get("/", async (_req, res) => {
+  interface Entry {
+    date: string;
+  }
+  const db = client.database("test");
+  const entries = db.collection<Entry>("entries");
+  await entries.insertOne({ date: new Date() });
+  res.json(await entries.find({}).toArray());
+});
+
+await app.listen();
