@@ -1,0 +1,23 @@
+version: "3.7"
+
+services:
+  api:
+    build:
+      context: .
+    environment:
+      FRONTEND_URL: ""
+    depends_on:
+      - mongodb
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/usr/src
+
+  mongodb:
+    image: mongo
+    volumes:
+      - mongo-cero-data:/data/db
+
+volumes:
+  mongo-cero-data:
+    driver: local
