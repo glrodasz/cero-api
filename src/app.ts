@@ -8,6 +8,7 @@ type PartialRecord<K extends string | number | symbol, T> = { [P in K]?: T };
 interface Request {
   path: string;
   method: Method;
+  body: any;
 }
 
 interface Response {
@@ -31,7 +32,7 @@ export class App {
     for await (const req of this.server) {
       const { url, method } = req as { method: Method; url: string };
 
-      const request = { path: url, method: method };
+      const request = { path: url, method: method, body: req.body };
       const response = {
         send: (str: string) => {
           req.respond({ body: str });
