@@ -8,6 +8,7 @@ export const createTask = async (
 ) => {
   try {
     const db = server.mongo.db as Db;
+    // TODO: define if use json-schema-to-ts
     const { title } = request.body;
     const data = {
       title,
