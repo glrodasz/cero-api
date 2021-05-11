@@ -1,61 +1,28 @@
-import { App } from "./app.ts";
-import { client } from "./db.ts";
+import fastify from "fastify";
+import fastifyCors from "fastify-cors";
+import dbConnector from "./db/connection";
+import dotenv from "dotenv";
 
-const PORT = 8080;
+dotenv.config();
 
-const app = new App(PORT);
+const server = fastify({ logger: { prettyPrint: true } });
 
-interface Entry {
-  description: string;
-  status: string;
-  priority: number;
-}
-
-
-
-app.use(() => {
-  console.log("This is a middleware");
+server.register(fastifyCors, {
+  origin: "*",
 });
 
-app.get("/helloWorld", (_req, res) => {
-  res.send("Hello World");
+//server.register(dbConnector);
+
+server.get("/", async (request, reply) => {
+  return "Hello World!";
 });
 
-app.get("/tasks", async (_req, res) => {
-  const db = client.database("test");
-  const tasks = db.collection<Entry>("tasks");
-
-  res.json(await tasks.find({}).toArray());
-});
-
-app.post("/tasks", async (req, res) => {
-  // TODO: move to app.ts
-  const decoder = new TextDecoder('utf-8')
-  const body = await Deno.readAll(req.body)
-  const bodyJson = JSON.parse(decoder.decode(body))
-
-  const db = client.database("test");
-  const tasks = db.collection<Entry>("tasks");
-  await tasks.insertOne({ ...bodyJson });
-
-  res.send("Taks has been created");
-});
-
-app.get("/", async (_req, res) => {
-  interface Entry {
-    date: string;
+server.listen(process.env.PORT || 3000, "0.0.0.0", (err, address) => {
+  if (err) {
+    console.log(err);
+    process.exit(1);
   }
-  const db = client.database("test");
-  const entries = db.collection<Entry>("entries");
-  await entries.insertOne({ date: new Date() });
-  res.json(await entries.find({}).toArray());
+  console.log(`Server listening at ${address}`);
 });
 
-app.get("/focus-sessions", (_req, res) => {
-  res.json([{
-    "status": "finished",
-    "id": 1
-  }]);
-});
-
-await app.listen();
+export default server;

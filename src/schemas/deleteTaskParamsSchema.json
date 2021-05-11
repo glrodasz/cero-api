@@ -1,0 +1,8 @@
+{
+  "title": "deleteTaskParamsSchema",
+  "type": "object",
+  "properties": {
+    "taskId": { "description": "Id of the task" }
+  },
+  "required": ["taskId"]
+}

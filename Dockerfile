@@ -1,15 +1,13 @@
-FROM hayd/alpine-deno:1.9.0
+from node:14.14-alpine as builder
 
+WORKDIR /src/app
+
+COPY package.json /src/app
+COPY yarn.lock /src/app
+
+RUN yarn install
+
+COPY --from=builder /src/app /src/app
 EXPOSE 8080
 
-WORKDIR /app
-
-USER deno
-
-COPY deps.ts .
-RUN deno cache deps.ts
-
-ADD . .
-RUN deno cache src/index.ts
-
-CMD ["run", "--allow-net", "src/index.ts"]
+ENTRYPOINT ["yarn", "start"]
