@@ -5,7 +5,7 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export interface CreateTaskParamsSchema {
+export interface CreateTaskBodySchema {
   /**
    * Id of the task
    */

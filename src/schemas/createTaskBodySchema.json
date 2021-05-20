@@ -1,5 +1,5 @@
 {
-  "title": "createTaskParamsSchema",
+  "title": "createTaskBodySchema",
   "type": "object",
   "properties": {
     "id": { "description": "Id of the task", "type": "string" },

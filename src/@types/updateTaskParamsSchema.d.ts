@@ -9,6 +9,6 @@ export interface UpdateTaskParamsSchema {
   /**
    * Id of the task
    */
-  taskId: string;
+  id: string;
   [k: string]: unknown;
 }

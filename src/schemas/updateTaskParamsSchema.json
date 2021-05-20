@@ -2,7 +2,7 @@
   "title": "updateTaskParamsSchema",
   "type": "object",
   "properties": {
-    "taskId": { "description": "Id of the task", "type": "string" }
+    "id": { "description": "Id of the task", "type": "string" }
   },
-  "required": ["taskId"]
+  "required": ["id"]
 }
