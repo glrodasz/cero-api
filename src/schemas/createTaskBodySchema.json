@@ -1,7 +1,13 @@
 {
-  "title": "createTaskBodySchema",
+  "title": "createTaskParamsSchema",
   "type": "object",
   "properties": {
-    "title": { "description": "Title of the task" }
-  }
+    "id": { "description": "Id of the task", "type": "string" },
+    "description": {
+      "description": "description of the task",
+      "type": "string"
+    },
+    "priority": { "description": "priority of the task", "type": "number" }
+  },
+  "required": ["id", "description", "priority"]
 }
