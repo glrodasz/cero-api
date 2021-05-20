@@ -1,6 +1,9 @@
 import { RouteHandlerMethod, RouteOptions } from "fastify";
 import * as taskController from "../controllers/tasks";
 import createTaskBodySchema from "../schemas/createTaskBodySchema.json";
+import updateTaskBodySchema from "../schemas/updateTaskBodySchema.json";
+import updateTaskParamsSchema from "../schemas/updateTaskParamsSchema.json";
+import deleteTaskParamsSchema from "../schemas/deleteTaskParamsSchema.json";
 
 const createTaskRoute: RouteOptions = {
   method: "POST",
@@ -19,12 +22,14 @@ const updateTaskRoute: RouteOptions = {
   method: "PUT",
   url: "/tasks/:taskId",
   handler: taskController.updateTask as RouteHandlerMethod,
+  schema: { body: updateTaskBodySchema, params: updateTaskParamsSchema },
 };
 
 const deleteTaskRoute: RouteOptions = {
   method: "DELETE",
   url: "/tasks/:taskId",
   handler: taskController.deleteTask as RouteHandlerMethod,
+  schema: { params: deleteTaskParamsSchema },
 };
 
 const tasksRoutes = [
