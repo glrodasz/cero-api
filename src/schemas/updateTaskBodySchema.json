@@ -1,0 +1,13 @@
+{
+    "title": "updateTaskBodySchema",
+    "type": "object",
+    "properties": {
+      "description": {
+        "description": "description of the task",
+        "type": "string"
+      },
+      "priority": { "description": "priority of the task", "type": "number" }
+    },
+    "required": ["description", "priority"]
+  }
+  

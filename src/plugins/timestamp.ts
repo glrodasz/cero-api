@@ -1,4 +1,4 @@
-const fp = require("fastify-plugin");
+import fp from 'fastify-plugin'
 
 module.exports = fp(async (fastify, opts) => {
   fastify.decorate("timestamp", function () {

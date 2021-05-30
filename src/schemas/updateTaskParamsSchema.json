@@ -1,5 +1,5 @@
 {
-  "title": "deleteTaskParamsSchema",
+  "title": "updateTaskParamsSchema",
   "type": "object",
   "properties": {
     "id": { "description": "Id of the task", "type": "string" }
