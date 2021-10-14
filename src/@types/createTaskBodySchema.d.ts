@@ -7,9 +7,9 @@
 
 export interface CreateTaskBodySchema {
   /**
-   * Id of the task
+   * Title of the task
    */
-  id: string;
+  title: string;
   /**
    * description of the task
    */
