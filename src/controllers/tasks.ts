@@ -1,11 +1,11 @@
 import server from "../index";
 import { FastifyRequest, FastifyReply } from "fastify";
+import { ObjectId, Db } from "mongodb";
+
 import { CreateTaskBodySchema } from "../@types/createTaskBodySchema";
 import { UpdateTaskBodySchema } from "../@types/updateTaskBodySchema";
 import { UpdateTaskParamsSchema } from "../@types/updateTaskParamsSchema";
 import { DeleteTaskParamsSchema } from "../@types/deleteTaskParamsSchema";
-import { ObjectId } from "bson";
-import { Db } from "mongodb";
 
 export const createTask = async (
   request: FastifyRequest<{ Body: CreateTaskBodySchema }>,
@@ -20,7 +20,7 @@ export const createTask = async (
       description,
       priority,
     };
-    const createdTask = await db.collection("tasksUsers").insertOne(data);
+    const createdTask = await db.collection("tasks").insertOne(data);
     return { id: createdTask.insertedId };
   } catch (error) {
     server.log.error("error inserting data");
@@ -34,7 +34,7 @@ export const getTasks = async (
 ) => {
   try {
     const db = server.mongo.db as Db;
-    const tasks = await db.collection("tasksUsers").find().toArray();
+    const tasks = await db.collection("tasks").find().toArray();
     return tasks;
   } catch (error) {
     server.log.error("error reading data");
@@ -58,7 +58,7 @@ export const updateTask = async (
     };
     const db = server.mongo.db as Db;
     const updatedTask = await db
-      .collection("tasksUsers")
+      .collection("tasks")
       .updateOne({ _id: new ObjectId(id) }, { $set: data });
     return { updatedElements: updatedTask.modifiedCount };
   } catch (error) {
@@ -77,7 +77,7 @@ export const deleteTask = async (
     const { id } = request.params;
     const db = server.mongo.db as Db;
     const deletedTask = await db
-      .collection("tasksUsers")
+      .collection("tasks")
       .deleteOne({ _id: new ObjectId(id) });
     return { deletedElements: deletedTask.deletedCount };
   } catch (error) {
