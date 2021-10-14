@@ -20,14 +20,14 @@ const getTasksRoute: RouteOptions = {
 
 const updateTaskRoute: RouteOptions = {
   method: "PUT",
-  url: "/tasks/:taskId",
+  url: "/tasks/:id",
   handler: taskController.updateTask as RouteHandlerMethod,
   schema: { body: updateTaskBodySchema, params: updateTaskParamsSchema },
 };
 
 const deleteTaskRoute: RouteOptions = {
   method: "DELETE",
-  url: "/tasks/:taskId",
+  url: "/tasks/:id",
   handler: taskController.deleteTask as RouteHandlerMethod,
   schema: { params: deleteTaskParamsSchema },
 };
