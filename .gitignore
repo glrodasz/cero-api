@@ -66,3 +66,6 @@ examples/typescript-server.js
 test/types/index.js
 
 /dist
+
+/mongo_data
+.env
