@@ -2,6 +2,7 @@ import fastify from "fastify";
 import fastifyCors from "fastify-cors";
 import dbConnector from "./db/connection";
 import dotenv from "dotenv";
+import tasksRoutes from "./routes/tasks";
 
 dotenv.config();
 
@@ -11,10 +12,10 @@ server.register(fastifyCors, {
   origin: "*",
 });
 
-//server.register(dbConnector);
+server.register(dbConnector);
 
-server.get("/", async (request, reply) => {
-  return "Hello World!";
+tasksRoutes.forEach((route) => {
+  server.route(route);
 });
 
 server.listen(process.env.PORT || 3000, "0.0.0.0", (err, address) => {
@@ -22,7 +23,6 @@ server.listen(process.env.PORT || 3000, "0.0.0.0", (err, address) => {
     console.log(err);
     process.exit(1);
   }
-  console.log(`Server listening at ${address}`);
 });
 
 export default server;
