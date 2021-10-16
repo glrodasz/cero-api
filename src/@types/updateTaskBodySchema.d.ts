@@ -9,10 +9,10 @@ export interface UpdateTaskBodySchema {
   /**
    * description of the task
    */
-  description: string;
+  description: string
   /**
    * priority of the task
    */
-  priority: number;
-  [k: string]: unknown;
+  priority: number
+  [k: string]: unknown
 }
