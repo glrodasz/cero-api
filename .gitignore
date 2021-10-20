@@ -69,3 +69,6 @@ test/types/index.js
 
 /mongo_data
 .env
+
+# Optional eslint cache
+.eslintcache
