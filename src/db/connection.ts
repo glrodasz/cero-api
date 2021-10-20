@@ -1,6 +1,6 @@
-import { FastifyInstance, FastifyPluginOptions } from "fastify";
-import fastifyMongodb from "fastify-mongodb";
-import FastifyPlugin from "fastify-plugin";
+import { FastifyInstance, FastifyPluginOptions } from 'fastify'
+import fastifyMongodb from 'fastify-mongodb'
+import FastifyPlugin from 'fastify-plugin'
 
 async function dbConnector(
   fastify: FastifyInstance,
@@ -13,12 +13,12 @@ async function dbConnector(
     })
     .after((error) => {
       if (error) {
-        fastify.log.error("error connecting to mongo");
+        fastify.log.error('error connecting to mongo')
       }
-      fastify.log.info("Connected to MongoDB 🎉");
-    });
+      fastify.log.info('Connected to MongoDB 🎉')
+    })
 }
 
 export = FastifyPlugin(dbConnector, {
-  name: "dbConnector",
-});
+  name: 'dbConnector',
+})

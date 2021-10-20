@@ -2,12 +2,12 @@
   "title": "createTaskBodySchema",
   "type": "object",
   "properties": {
-    "id": { "description": "Id of the task", "type": "string" },
+    "title": { "description": "Title of the task", "type": "string" },
     "description": {
       "description": "description of the task",
       "type": "string"
     },
     "priority": { "description": "priority of the task", "type": "number" }
   },
-  "required": ["id", "description", "priority"]
+  "required": ["title", "description", "priority"]
 }

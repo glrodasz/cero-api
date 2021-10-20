@@ -9,6 +9,6 @@ export interface DeleteTaskParamsSchema {
   /**
    * Id of the task
    */
-  id: string;
-  [k: string]: unknown;
+  id: string
+  [k: string]: unknown
 }
