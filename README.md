@@ -7,7 +7,7 @@ The project is live streaming in [Twitch](https://glrz.me/stream) in Spanish, ev
 Feel free to use a local Mongo database or use the docker-compose
 
 ```bash
-yarn
+yarn install
 ```
 
 Run the API
