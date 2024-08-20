@@ -1,16 +1,13 @@
 import fastify from 'fastify'
 import fastifyCors from 'fastify-cors'
 import swagger from 'fastify-swagger'
-import dotenv from 'dotenv'
 import os from 'os'
 
 import dbConnector from './db/connection'
 import tasksRoutes from './routes/tasks'
 import options from './utils/swagger'
 
-dotenv.config()
-
-const { PORT: port = 3000 } = process.env
+const { PORT: port } = process.env
 const server = fastify({ logger: { prettyPrint: true } })
 
 server.register(dbConnector)
