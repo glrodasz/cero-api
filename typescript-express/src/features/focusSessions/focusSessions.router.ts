@@ -1,26 +1,144 @@
-import express, { Express, Router, Request, Response } from "express";
-const focusSessionRouter: Router = express.Router();
+import {
+  Router,
+  type Application,
+  type Request,
+  type Response,
+  type NextFunction,
+} from "express";
+import type { FocusSession } from "./FocusSession";
+import { HTTP_STATUS } from "../common/constants";
+import { focusSessionsService } from "./focusSessions.service";
 
-focusSessionRouter.get("/active", (req: Request, res: Response) => {
-  res.json([{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }]);
-});
+type ErrorResponse = { message: string };
 
-focusSessionRouter.patch("/finish", (req: Request, res: Response) => {
-  res.json({ id: req.params.id });
-});
+const isCreateSessionBody = (
+  body: unknown
+): body is { tasks: string[]; startTime?: number } => {
+  if (body == null || typeof body !== "object") {
+    return false;
+  }
 
-focusSessionRouter.patch("/pause", (req: Request, res: Response) => {
-  res.json({ id: req.params.id });
-});
+  const candidate = body as { tasks?: unknown; startTime?: unknown };
 
-focusSessionRouter.patch("/resume", (req: Request, res: Response) => {
-  res.json({ id: req.params.id });
-});
+  const hasValidTasks =
+    Array.isArray(candidate.tasks) &&
+    candidate.tasks.every((taskId) => typeof taskId === "string");
 
-focusSessionRouter.post("/", (req: Request, res: Response) => {
-  res.json([{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }]);
-});
+  const hasValidStartTime =
+    candidate.startTime === undefined || typeof candidate.startTime === "number";
 
-export default (app: Express) => {
+  return hasValidTasks && hasValidStartTime;
+};
+
+const focusSessionRouter: Router = Router();
+
+focusSessionRouter.get(
+  "/active",
+  async (
+    req: Request,
+    res: Response<FocusSession[] | ErrorResponse>,
+    next: NextFunction
+  ) => {
+    try {
+      const sessions = await focusSessionsService.getActiveSessions();
+      res.status(HTTP_STATUS.OK).json(sessions);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+focusSessionRouter.post(
+  "/",
+  async (
+    req: Request,
+    res: Response<FocusSession | ErrorResponse>,
+    next: NextFunction
+  ) => {
+    try {
+      if (!isCreateSessionBody(req.body)) {
+        return res
+          .status(HTTP_STATUS.BAD_REQUEST)
+          .json({ message: "Invalid focus session payload" });
+      }
+
+      const session = await focusSessionsService.createSession(req.body);
+      res.status(HTTP_STATUS.CREATED).json(session);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+focusSessionRouter.patch(
+  "/:id/finish",
+  async (
+    req: Request<{ id: string }>,
+    res: Response<FocusSession | ErrorResponse>,
+    next: NextFunction
+  ) => {
+    try {
+      const session = await focusSessionsService.finishSession(req.params.id);
+
+      if (!session) {
+        return res
+          .status(HTTP_STATUS.NOT_FOUND)
+          .json({ message: "Focus session not found" });
+      }
+
+      res.status(HTTP_STATUS.OK).json(session);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+focusSessionRouter.patch(
+  "/:id/pause",
+  async (
+    req: Request<{ id: string }>,
+    res: Response<FocusSession | ErrorResponse>,
+    next: NextFunction
+  ) => {
+    try {
+      const session = await focusSessionsService.pauseSession(req.params.id);
+
+      if (!session) {
+        return res
+          .status(HTTP_STATUS.NOT_FOUND)
+          .json({ message: "Focus session not found or cannot be paused" });
+      }
+
+      res.status(HTTP_STATUS.OK).json(session);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+focusSessionRouter.patch(
+  "/:id/resume",
+  async (
+    req: Request<{ id: string }>,
+    res: Response<FocusSession | ErrorResponse>,
+    next: NextFunction
+  ) => {
+    try {
+      const session = await focusSessionsService.resumeSession(req.params.id);
+
+      if (!session) {
+        return res
+          .status(HTTP_STATUS.NOT_FOUND)
+          .json({ message: "Focus session not found or cannot be resumed" });
+      }
+
+      res.status(HTTP_STATUS.OK).json(session);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+export default (app: Application) => {
   app.use("/focus-sessions", focusSessionRouter);
 };
