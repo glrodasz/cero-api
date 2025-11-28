@@ -1,11 +1,11 @@
 import type { Task } from "../tasks/Task";
 
-export type FocusSessionStatus = "finished"
+export type FocusSessionStatus = "active" | "paused" | "finished";
 
 export type Pause = {
   id: string;
   startTime: number;
-  endTime: number;
+  endTime: number | null;
   time: number;
 };
 
