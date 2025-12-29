@@ -1,35 +1,32 @@
-import fastify from 'fastify'
-import fastifyCors from 'fastify-cors'
-import swagger from 'fastify-swagger'
-import os from 'os'
+import Fastify from "fastify";
+import cors from "@fastify/cors";
+import mongoose from "mongoose";
+import tasksRouter from "./features/tasks/tasks.router";
+import focusSessionRouter from "./features/focusSessions/focusSessions.router";
 
-import dbConnector from './db/connection'
-import tasksRoutes from './routes/tasks'
-import options from './utils/swagger'
+const app = Fastify({ logger: true });
 
-const { PORT: port } = process.env
-const server = fastify({ logger: { prettyPrint: true } })
+app.register(cors);
+app.register(tasksRouter, { prefix: "/tasks" });
+app.register(focusSessionRouter, { prefix: "/focus-sessions" });
 
-server.register(dbConnector)
-server.register(fastifyCors, {
-  origin: '*',
-})
+const port = Number(process.env.PORT) || 3000;
+const mongoUri = process.env.MONGODB_URI ?? "mongodb://127.0.0.1:27017/cero";
 
-server.register(swagger, options)
+const startServer = async () => {
+  try {
+    await mongoose.connect(mongoUri);
+    app.log.info("Connected to MongoDB");
 
-tasksRoutes.forEach((route) => {
-  server.route(route)
-})
-
-server.get('/', async (request, reply) => {
-  reply.send({ message: 'Reto API running', instance: os.hostname() })
-})
-
-server.listen(port, '0.0.0.0', (err) => {
-  if (err) {
-    console.log(err)
-    process.exit(1)
+    await app.listen({ port, host: "0.0.0.0" });
+    app.log.info(`Server is running on port ${port}`);
+  } catch (error) {
+    app.log.error("Failed to start server");
+    app.log.error(error);
+    process.exit(1);
   }
-})
+};
 
-export default server
+void startServer();
+
+export default app;

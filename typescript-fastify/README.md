@@ -1,27 +1,26 @@
-# Cero to Production — API
+# Typescript Fastify example
 
-Cero to Production is a project where we are building a productivity management application called "RETO" in this series of live coding sessions. The idea behind this sessions is to show all the complications and real thinking and decision making that common programmer do in daily basis with JavaScript.
+This example mirrors the structure used in the `typescript-express` project but swaps the framework for Fastify 5.6. It exposes task and focus session endpoints backed by MongoDB and uses the same mongoose models as the Express sample.
 
-The project is live streaming in [Twitch](https://glrz.me/stream) in Spanish, every Tuesdays and Thursdays.
+## Getting started
 
-## Development environment
-
-Feel free to use a local Mongo database or use the [docker-compose](https://docs.docker.com/compose)
-
-On the root of the project run the following command
+1. Copy environment variables:
 
 ```bash
-cat .env.example > .env
+cd typescript-fastify
+cp .env.example .env
 ```
 
-Fill all the environment variables on the `.env` file
+2. Install dependencies:
 
 ```bash
 yarn install
 ```
 
-Run the API
+3. Run the API in development mode:
 
 ```bash
 yarn dev
 ```
+
+The server will start on `http://localhost:3000` by default and connect to MongoDB using the `MONGODB_URI` value in your `.env` file.
