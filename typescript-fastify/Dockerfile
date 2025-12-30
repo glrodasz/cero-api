@@ -1,13 +1,15 @@
-from node:14.14-alpine as builder
+FROM node:22-alpine AS base
 
-WORKDIR /src/app
+WORKDIR /app
 
-COPY package.json /src/app
-COPY yarn.lock /src/app
+COPY package.json ./
 
-RUN yarn install
+RUN yarn install --frozen-lockfile || yarn install
 
-COPY --from=builder /src/app /src/app
-EXPOSE 8080
+COPY . .
 
-ENTRYPOINT ["yarn", "start"]
+RUN yarn build
+
+EXPOSE 3000
+
+CMD ["node", "dist/index.js"]

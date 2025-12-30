@@ -3,6 +3,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import tasksRouter from "./features/tasks/tasks.router.js";
 import focusSessionRouter from "./features/focusSessions/focusSessions.router.js";
+import config from "./config.js";
 
 const app: Application = express();
 
@@ -20,16 +21,13 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   res.status(500).json({ message: err.message || "Internal server error" });
 });
 
-const port = Number(process.env.PORT) || 3000;
-const mongoUri = process.env.MONGODB_URI ?? "mongodb://root:root@127.0.0.1:27017/cero?authSource=admin";
-
 const startServer = async () => {
   try {
-    await mongoose.connect(mongoUri);
+    await mongoose.connect(config.mongodbUri);
     console.log("Connected to MongoDB");
 
-    app.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
+    app.listen(config.port, () => {
+      console.log(`Server is running on port ${config.port}`);
     });
   } catch (error) {
     console.error("Failed to start server", error);
