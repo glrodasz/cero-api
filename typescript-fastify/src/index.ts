@@ -1,10 +1,16 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import mongoose from "mongoose";
-import tasksRouter from "./features/tasks/tasks.router";
-import focusSessionRouter from "./features/focusSessions/focusSessions.router";
+import tasksRouter from "./features/tasks/tasks.router.js";
+import focusSessionRouter from "./features/focusSessions/focusSessions.router.js";
 
 const app = Fastify({ logger: true });
+
+// Global error handler
+app.setErrorHandler((error, request, reply) => {
+  app.log.error(error);
+  reply.status(500).send({ message: error instanceof Error ? error.message : "Internal server error" });
+});
 
 app.register(cors);
 app.register(tasksRouter, { prefix: "/tasks" });
@@ -15,7 +21,13 @@ const mongoUri = process.env.MONGODB_URI ?? "mongodb://127.0.0.1:27017/cero";
 
 const startServer = async () => {
   try {
-    await mongoose.connect(mongoUri);
+    await mongoose.connect(mongoUri, {
+      authSource: "admin",
+      auth: {
+        username: "root",
+        password: "root",
+      },
+    });
     app.log.info("Connected to MongoDB");
 
     await app.listen({ port, host: "0.0.0.0" });

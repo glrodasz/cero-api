@@ -1,12 +1,12 @@
-import {
+import mongoose, {
   Schema,
   model,
-  models,
   isValidObjectId,
   type Document,
   type Model,
 } from "mongoose";
-import type { Task } from "./Task";
+import type { Task, TaskStatus } from "./Task.js";
+import type { FocusSession } from "../focusSessions/FocusSession.js";
 
 type TaskAttributes = Omit<Task, "id">;
 
@@ -17,12 +17,12 @@ interface TaskDocument extends Document, TaskAttributes {
 const taskSchema = new Schema<TaskDocument>({
   description: { type: String, required: true },
   priority: { type: Number, required: true },
-  status: { type: String, enum: ["complete", "reset"], required: true },
-  focusSessionId: { type: String, required: true },
+  status: { type: String, enum: ["in-progress", "pending", "completed"], required: true },
+  focusSessionId: { type: String, required: false, default: null },
 });
 
 const TaskModel: Model<TaskDocument> =
-  models.Task ?? model<TaskDocument>("Task", taskSchema);
+  mongoose.models.Task ?? model<TaskDocument>("Task", taskSchema);
 
 const toTask = (task: TaskDocument): Task => ({
   id: task.id,
@@ -37,7 +37,7 @@ export const tasksService = {
     const tasks = await TaskModel.find().exec();
     return tasks.map(toTask);
   },
-  getTask: async (id: string): Promise<Task | null> => {
+  getTask: async (id: Task["id"]): Promise<Task | null> => {
     if (!isValidObjectId(id)) {
       return null;
     }
@@ -45,7 +45,67 @@ export const tasksService = {
     const task = await TaskModel.findById(id).exec();
     return task ? toTask(task) : null;
   },
-  deleteTask: async (id: string): Promise<Task | null> => {
+  getTasksByStatus: async (status: TaskStatus): Promise<Task[]> => {
+    const tasks = await TaskModel.find({ status }).exec();
+    return tasks.map(toTask);
+  },
+  getTasksByFocusSessionId: async (focusSessionId: FocusSession["id"]): Promise<Task[]> => {
+    const tasks = await TaskModel.find({ focusSessionId })
+      .sort({ priority: 1 })
+      .exec();
+    return tasks.map(toTask);
+  },
+  getTasksByStatusSorted: async (status: TaskStatus): Promise<Task[]> => {
+    const tasks = await TaskModel.find({ status })
+      .sort({ priority: 1 })
+      .exec();
+    return tasks.map(toTask);
+  },
+  getTasksByStatuses: async (statuses: TaskStatus[]): Promise<Task[]> => {
+    const tasks = await TaskModel.find({ status: { $in: statuses } })
+      .sort({ priority: 1 })
+      .exec();
+    return tasks.map(toTask);
+  },
+  getTasksByFocusSessionIdAndStatuses: async (
+    focusSessionId: FocusSession["id"],
+    statuses: TaskStatus[]
+  ): Promise<Task[]> => {
+    const tasks = await TaskModel.find({
+      focusSessionId,
+      status: { $in: statuses },
+    })
+      .sort({ priority: 1 })
+      .exec();
+    return tasks.map(toTask);
+  },
+  updateTasksFocusSessionId: async (
+    taskIds: Task["id"][],
+    focusSessionId: FocusSession["id"]
+  ): Promise<void> => {
+    const validIds = taskIds.filter((id) => isValidObjectId(id));
+    if (validIds.length > 0) {
+      await TaskModel.updateMany(
+        { _id: { $in: validIds } },
+        { $set: { focusSessionId } }
+      ).exec();
+    }
+  },
+  updateTasksPriorities: async (
+    tasks: Array<{ id: Task["id"]; priority: number }>
+  ): Promise<void> => {
+    const updates = tasks
+      .filter((task) => isValidObjectId(task.id))
+      .map((task) =>
+        TaskModel.updateOne(
+          { _id: task.id },
+          { $set: { priority: task.priority } }
+        ).exec()
+      );
+
+    await Promise.all(updates);
+  },
+  deleteTask: async (id: Task["id"]): Promise<Task | null> => {
     if (!isValidObjectId(id)) {
       return null;
     }
@@ -58,7 +118,7 @@ export const tasksService = {
     return toTask(createdTask);
   },
   updateTask: async (
-    id: string,
+    id: Task["id"],
     body: Partial<TaskAttributes>
   ): Promise<Task | null> => {
     if (!isValidObjectId(id)) {

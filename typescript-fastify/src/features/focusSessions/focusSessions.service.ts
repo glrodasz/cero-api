@@ -1,7 +1,6 @@
-import {
+import mongoose, {
   Schema,
   model,
-  models,
   isValidObjectId,
   type Document,
   type Model,
@@ -10,12 +9,14 @@ import type {
   FocusSession,
   FocusSessionStatus,
   Pause,
-} from "./FocusSession";
+} from "./FocusSession.js";
+import { ACTIVE_SESSION_STATUSES } from "./FocusSession.js";
+import type { Task } from "../tasks/Task.js";
 
 type FocusSessionAttributes = {
   status: FocusSessionStatus;
   startTime: number;
-  tasks: string[];
+  tasks: Task["id"][];
   pauses: Pause[];
 };
 
@@ -48,7 +49,7 @@ const focusSessionSchema = new Schema<FocusSessionDocument>({
 });
 
 const FocusSessionModel: Model<FocusSessionDocument> =
-  models.FocusSession ??
+  mongoose.models.FocusSession ??
   model<FocusSessionDocument>("FocusSession", focusSessionSchema);
 
 const toPause = (pause: PauseDocument): Pause => ({
@@ -75,13 +76,33 @@ const closeActivePause = (session: FocusSessionDocument) => {
   }
 };
 
+const calculateTotalPauseTime = (session: FocusSessionDocument): number => {
+  return session.pauses.reduce((total: number, pause: PauseDocument) => {
+    if (pause.endTime != null) {
+      return total + (pause.endTime - pause.startTime);
+    }
+    return total;
+  }, 0);
+};
+
 export const focusSessionsService = {
+  getAllSessions: async (): Promise<FocusSession[]> => {
+    const sessions = await FocusSessionModel.find().exec();
+    return sessions.map(toFocusSession);
+  },
   getActiveSessions: async (): Promise<FocusSession[]> => {
     const sessions = await FocusSessionModel.find({
-      status: { $in: ["active", "paused"] },
+      status: { $in: ACTIVE_SESSION_STATUSES },
     }).exec();
 
     return sessions.map(toFocusSession);
+  },
+  getActiveSession: async (): Promise<FocusSession | null> => {
+    const session = await FocusSessionModel.findOne({
+      status: { $in: ACTIVE_SESSION_STATUSES },
+    }).exec();
+
+    return session ? toFocusSession(session) : null;
   },
   createSession: async (
     payload: Pick<FocusSessionAttributes, "tasks"> &
@@ -96,7 +117,7 @@ export const focusSessionsService = {
 
     return toFocusSession(session);
   },
-  finishSession: async (id: string): Promise<FocusSession | null> => {
+  finishSession: async (id: FocusSession["id"]): Promise<FocusSession | null> => {
     if (!isValidObjectId(id)) {
       return null;
     }
@@ -112,7 +133,7 @@ export const focusSessionsService = {
     await session.save();
     return toFocusSession(session);
   },
-  pauseSession: async (id: string): Promise<FocusSession | null> => {
+  pauseSession: async (id: FocusSession["id"]): Promise<FocusSession | null> => {
     if (!isValidObjectId(id)) {
       return null;
     }
@@ -122,20 +143,18 @@ export const focusSessionsService = {
       return null;
     }
 
-    const newPause = session.pauses.create({
+    session.pauses.push({
       startTime: Date.now(),
       endTime: null,
       time: 0,
-    });
-
-    session.pauses.push(newPause);
+    } as PauseDocument);
 
     session.status = "paused";
 
     await session.save();
     return toFocusSession(session);
   },
-  resumeSession: async (id: string): Promise<FocusSession | null> => {
+  resumeSession: async (id: FocusSession["id"]): Promise<FocusSession | null> => {
     if (!isValidObjectId(id)) {
       return null;
     }
@@ -150,5 +169,80 @@ export const focusSessionsService = {
 
     await session.save();
     return toFocusSession(session);
+  },
+  pauseActiveSession: async (time?: number): Promise<FocusSession | null> => {
+    const session = await FocusSessionModel.findOne({
+      status: { $in: ACTIVE_SESSION_STATUSES },
+    }).exec();
+
+    if (!session) {
+      return null;
+    }
+
+    // Check if there's an active pause
+    const activePause = session.pauses.find((pause: PauseDocument) => pause.endTime === null);
+
+    // If active pause exists and time parameter provided, resume first
+    if (activePause && time !== undefined) {
+      closeActivePause(session);
+      await session.save();
+    } else if (activePause && time === undefined) {
+      // Already paused, return current session
+      return toFocusSession(session);
+    }
+
+    // Create new pause
+    session.pauses.push({
+      startTime: Date.now(),
+      endTime: null,
+      time: time ?? 0,
+    } as PauseDocument);
+    session.status = "paused";
+
+    await session.save();
+    return toFocusSession(session);
+  },
+  resumeActiveSession: async (): Promise<FocusSession | null> => {
+    const session = await FocusSessionModel.findOne({
+      status: { $in: ACTIVE_SESSION_STATUSES },
+    }).exec();
+
+    if (!session) {
+      return null;
+    }
+
+    const activePause = session.pauses.find((pause: PauseDocument) => pause.endTime === null);
+
+    if (!activePause) {
+      // No active pause, return current session
+      return toFocusSession(session);
+    }
+
+    // Close the active pause
+    const now = Date.now();
+    activePause.endTime = now;
+    activePause.time = now - activePause.startTime;
+
+    session.status = "active";
+    await session.save();
+
+    return toFocusSession(session);
+  },
+  getActiveSessionWithAdjustedStartTime: async (): Promise<FocusSession | null> => {
+    const session = await FocusSessionModel.findOne({
+      status: { $in: ACTIVE_SESSION_STATUSES },
+    }).exec();
+
+    if (!session) {
+      return null;
+    }
+
+    const totalPauseTime = calculateTotalPauseTime(session);
+    const adjustedSession = toFocusSession(session);
+    
+    return {
+      ...adjustedSession,
+      startTime: adjustedSession.startTime + totalPauseTime,
+    };
   },
 };
