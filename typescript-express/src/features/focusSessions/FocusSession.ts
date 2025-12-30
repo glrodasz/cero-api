@@ -1,6 +1,8 @@
-import type { Task } from "../tasks/Task";
+import type { Task } from "../tasks/Task.js";
 
 export type FocusSessionStatus = "active" | "paused" | "finished";
+
+export const ACTIVE_SESSION_STATUSES: FocusSessionStatus[] = ["active", "paused"];
 
 export type Pause = {
   id: string;
