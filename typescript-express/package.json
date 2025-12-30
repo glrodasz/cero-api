@@ -4,6 +4,10 @@
   "main": "index.js",
   "type": "module",
   "license": "MIT",
+  "packageManager": "yarn@4.12.0",
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "scripts": {
     "dev": "docker-compose up -d && tsx watch --env-file=.env src/index.ts",
     "start:database": "docker-compose up -d",
