@@ -1,8 +1,16 @@
 {
   "typescript-express": {"cwd": "typescript-express", "start": "yarn start", "url": "http://127.0.0.1:3000"},
   "typescript-fastify": {"cwd": "typescript-fastify", "start": "yarn start", "url": "http://127.0.0.1:3001"},
+  "typescript-nest": {"cwd": "typescript-nest", "start": "yarn start", "url": "http://127.0.0.1:3002"},
+  "typescript-graphql": {"cwd": "typescript-graphql", "start": "yarn start", "url": "http://127.0.0.1:3003/graphql", "protocol": "graphql"},
+  "typescript-firebase": {"cwd": "typescript-firebase/functions", "start": "yarn emulators", "url": "http://127.0.0.1:5001/demo-cero/us-central1/api", "ready": "/tasks", "knownFailures": {"refuses malformed JSON": "Cloud Functions parses JSON bodies before the app runs and answers with an HTML page"}},
+  "typescript-supabase": {"cwd": "typescript-supabase", "start": "deno task start", "url": "http://127.0.0.1:54321/functions/v1/api", "ready": "/tasks"},
+  "python-fastapi": {"cwd": "python-fastapi", "start": "uv run fastapi run", "url": "http://127.0.0.1:8000"},
+  "python-graphql": {"cwd": "python-graphql", "start": "uv run cero-graphql", "url": "http://127.0.0.1:8001/graphql", "protocol": "graphql"},
+  "go-gin": {"cwd": "go-gin", "start": "go run ./cmd/server", "url": "http://127.0.0.1:8080"},
+  "go-fiber": {"cwd": "go-fiber", "start": "go run ./cmd/server", "url": "http://127.0.0.1:8081"},
   "rust-axum": {"cwd": "rust-axum", "start": "cargo run", "url": "http://127.0.0.1:8090"},
   "rust-actix": {"cwd": "rust-actix", "start": "cargo run", "url": "http://127.0.0.1:8091"},
-  "go-gin": {"cwd": "go-gin", "start": "go run ./cmd/server", "url": "http://127.0.0.1:8080"},
-  "go-fiber": {"cwd": "go-fiber", "start": "go run ./cmd/server", "url": "http://127.0.0.1:8081"}
+  "php-laravel": {"cwd": "php-laravel", "start": "composer start", "url": "http://127.0.0.1:8100"},
+  "elixir-phoenix": {"cwd": "elixir-phoenix", "start": "mix phx.server", "url": "http://127.0.0.1:4000", "env": {"MIX_ENV": "dev"}}
 }

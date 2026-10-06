@@ -87,7 +87,7 @@ const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&
 const runSuite = () =>
   new Promise<number>((resolve) => {
     const knownFailures = Object.keys(app.knownFailures ?? {});
-    const skipFlags = knownFailures.map((name) => `--test-skip-pattern=^${escapeRegExp(name)}$`);
+    const skipFlags = knownFailures.map((name) => `--test-skip-pattern=${escapeRegExp(name)}$`);
 
     const tests = spawn(process.execPath, ["--test", "--test-concurrency=1", ...skipFlags, "src/**/*.test.ts"], {
       cwd: contractTestsDir,
