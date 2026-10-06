@@ -78,8 +78,9 @@ Each language follows its own naming style; the words stay the same.
 | Errors | `NotFoundError`, `ValidationError` | exceptions | error types + sentinels | `CoreError::{NotFound, Invalid}` |
 | Messages | `MESSAGES.TASK_NOT_FOUND` | `Messages.TASK_NOT_FOUND` | `MsgTaskNotFound` | `messages::TASK_NOT_FOUND` |
 | Clock | `() => number` | `Callable[[], int]` | `func() int64` | `Clock` trait |
-| Wiring | `createServices(repositories, { clock })` | `create_services` | `NewServices` | `Services::new` |
+| Wiring | `createServices(repositories, { clock })` | `create_services` | `NewServices` | `Services::new` / `with_clock` |
 | In-memory storage | `@cero/core/in-memory` | `cero_core.in_memory` | `memory` package | `cero_core::in_memory` |
+| Repository contract | `testRepositoryContract` (`@cero/core/testing`) | `RepositoryContract` (`cero-core[testing]`) | `coretest.RunRepositoryContract` | `repository_contract_tests!` (feature `testing`) |
 
 ## Running conventions
 
