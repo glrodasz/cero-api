@@ -1,0 +1,4 @@
+/.phpunit.cache
+.phpunit.result.cache
+/public/storage
+/storage/*.key
