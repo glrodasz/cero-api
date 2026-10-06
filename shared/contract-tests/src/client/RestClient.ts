@@ -4,7 +4,8 @@ export type RestResponse = { status: number; body: unknown };
 
 /** Sends a request and returns the raw outcome, whatever the status. */
 export const sendRequest = async (baseUrl: string, method: string, path: string, body?: unknown): Promise<RestResponse> => {
-  const response = await fetch(new URL(path, baseUrl), {
+  // Appended, not resolved: base URLs may carry a path (e.g. a Cloud Function's /demo-cero/us-central1/api).
+  const response = await fetch(`${baseUrl.replace(/\/$/, "")}${path}`, {
     method,
     headers: body === undefined ? {} : { "content-type": "application/json" },
     body: body === undefined ? undefined : typeof body === "string" ? body : JSON.stringify(body),
