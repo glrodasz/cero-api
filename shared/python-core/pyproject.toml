@@ -1,0 +1,21 @@
+[project]
+name = "cero-core"
+version = "1.0.0"
+description = "Domain, business rules and repository ports of the Cero API, independent of any framework or database."
+requires-python = ">=3.13"
+dependencies = []
+
+[project.optional-dependencies]
+# `cero_core.testing` (the repository contract) is a pytest suite. Storage
+# adapters install this extra to run it against their database.
+testing = [
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+]
+
+[dependency-groups]
+dev = ["cero-core[testing]"]
+
+[build-system]
+requires = ["uv_build>=0.12.23,<0.13"]
+build-backend = "uv_build"

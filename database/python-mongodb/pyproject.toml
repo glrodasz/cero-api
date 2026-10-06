@@ -1,0 +1,19 @@
+[project]
+name = "cero-mongodb"
+version = "1.0.0"
+description = "MongoDB storage for cero-core, built on PyMongo's async API."
+requires-python = ">=3.13"
+dependencies = [
+    "cero-core",
+    "pymongo>=4.18.2",
+]
+
+[dependency-groups]
+dev = ["cero-core[testing]"]
+
+[tool.uv.sources]
+cero-core = { workspace = true }
+
+[build-system]
+requires = ["uv_build>=0.12.23,<0.13"]
+build-backend = "uv_build"
