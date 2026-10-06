@@ -1,0 +1,41 @@
+# One place to run every database the implementations need.
+#
+#   docker compose up -d mongo      # TypeScript and Python (mongodb) stacks
+#   docker compose up -d postgres   # Python (postgres), Go, Rust, Laravel and Phoenix stacks
+#
+# Each language gets its own database inside the server, so stacks never share tables.
+name: cero-api
+
+services:
+  mongo:
+    image: mongo:8
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      retries: 10
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "root"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  mongo_data:
+  postgres_data:

@@ -1,3 +1,49 @@
-node_modules
+# Secrets and local configuration
 .env
-dist
+!.env.example
+
+# Node / TypeScript
+node_modules/
+dist/
+typescript-firebase/functions/lib/
+.yarn/*
+!.yarn/releases
+.pnp.*
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Go
+/go-*/bin/
+
+# Rust
+target/
+
+# PHP
+vendor/
+
+# Elixir
+_build/
+deps/
+*.ez
+erl_crash.dump
+
+# Firebase / Supabase local state
+.firebase/
+firebase-debug.log
+firestore-debug.log
+*-debug.log
+supabase/.temp/
+supabase/.branches/
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/

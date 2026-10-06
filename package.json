@@ -1,0 +1,23 @@
+{
+  "name": "cero-api",
+  "private": true,
+  "description": "Workspace root for the TypeScript implementations and their shared packages.",
+  "type": "module",
+  "packageManager": "yarn@4.12.0",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "workspaces": [
+    "shared/typescript-core",
+    "shared/graphql",
+    "shared/contract-tests",
+    "database/typescript-mongoose",
+    "typescript-express",
+    "typescript-fastify"
+  ],
+  "scripts": {
+    "test": "yarn workspaces foreach --all --parallel --topological run test",
+    "typecheck": "yarn workspaces foreach --all --parallel run typecheck",
+    "contract": "yarn workspace @cero/contract-tests run contract"
+  }
+}

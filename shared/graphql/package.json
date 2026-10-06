@@ -1,0 +1,10 @@
+{
+  "name": "@cero/graphql-schema",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./schema.graphql": "./schema.graphql"
+  }
+}
