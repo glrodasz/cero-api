@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    // Nest's dependency injection reads constructor parameter types at runtime
+    // (decorator metadata). Type stripping cannot emit that, so SWC compiles
+    // this package (`nest build`) and Nest's usual parameter properties are allowed.
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "erasableSyntaxOnly": false
+  },
+  "include": ["src", "test"]
+}

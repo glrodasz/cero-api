@@ -12,8 +12,12 @@
     "shared/graphql",
     "shared/contract-tests",
     "database/typescript-mongoose",
+    "database/typescript-firestore",
     "typescript-express",
-    "typescript-fastify"
+    "typescript-fastify",
+    "typescript-nest",
+    "typescript-graphql",
+    "typescript-firebase/functions"
   ],
   "scripts": {
     "test": "yarn workspaces foreach --all --parallel --topological run test",

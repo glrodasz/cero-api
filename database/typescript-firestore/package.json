@@ -1,0 +1,22 @@
+{
+  "name": "@cero/firestore",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Firestore storage for @cero/core, built on the Firebase Admin SDK.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\"",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@cero/core": "workspace:*",
+    "firebase-admin": "^14.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "typescript": "~6.0.3"
+  }
+}

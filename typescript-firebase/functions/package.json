@@ -1,0 +1,26 @@
+{
+  "name": "typescript-firebase",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The Cero API as a Cloud Function for Firebase, storing data in Firestore.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "build": "node build.ts",
+    "emulators": "yarn build && cd .. && npx firebase-tools@15 emulators:start --only functions,firestore --project demo-cero",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "firebase-admin": "^14.5.0",
+    "firebase-functions": "^7.4.0"
+  },
+  "devDependencies": {
+    "@cero/core": "workspace:*",
+    "@cero/firestore": "workspace:*",
+    "@types/node": "^22.18.0",
+    "esbuild": "^0.28.2",
+    "typescript": "~6.0.3",
+    "typescript-express": "workspace:*"
+  }
+}
