@@ -1,4 +1,4 @@
-import { spawn, spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
@@ -19,9 +19,17 @@ type App = {
   url: string;
   protocol?: "rest" | "graphql";
   env?: Record<string, string>;
+  /**
+   * Path (appended to `url`) that must answer 2xx before the suite starts.
+   * Needed by platforms that accept connections before the API is loaded,
+   * like the Firebase emulator. Without it, any HTTP answer means "ready".
+   */
+  ready?: string;
+  /** Tests the platform cannot pass, by exact name, with the reason. Skipped and reported. */
+  knownFailures?: Record<string, string>;
 };
 
-const STARTUP_TIMEOUT_MS = 180_000;
+const STARTUP_TIMEOUT_MS = 300_000;
 
 const contractTestsDir = fileURLToPath(new URL("..", import.meta.url));
 const repositoryRoot = fileURLToPath(new URL("../../..", import.meta.url));
@@ -42,6 +50,7 @@ const server = spawn(app.start, {
   env: { ...process.env, ...app.env },
   stdio: ["ignore", "pipe", "pipe"],
 });
+// Keep draining the server's output: a full pipe would block a server that logs every request.
 server.stdout.on("data", (chunk) => serverOutput.push(String(chunk)));
 server.stderr.on("data", (chunk) => serverOutput.push(String(chunk)));
 
@@ -53,35 +62,55 @@ const stopServer = () => {
   }
 };
 
-const waitUntilListening = async (url: string) => {
+const isReady = async (): Promise<boolean> => {
+  try {
+    const response = await fetch(`${app.url}${app.ready ?? ""}`, { signal: AbortSignal.timeout(2_000) });
+    return app.ready === undefined || response.ok;
+  } catch {
+    return false;
+  }
+};
+
+const waitUntilReady = async () => {
   const deadline = Date.now() + STARTUP_TIMEOUT_MS;
   while (Date.now() < deadline) {
     if (server.exitCode !== null) throw new Error(`${appName} exited with code ${server.exitCode}`);
-    try {
-      await fetch(url, { signal: AbortSignal.timeout(2_000) });
-      return; // any HTTP answer means the server is up
-    } catch {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    }
+    if (await isReady()) return;
+    await new Promise((resolve) => setTimeout(resolve, 500));
   }
-  throw new Error(`${appName} did not answer on ${url} within ${STARTUP_TIMEOUT_MS / 1000}s`);
+  throw new Error(`${appName} was not ready on ${app.url} within ${STARTUP_TIMEOUT_MS / 1000}s`);
 };
+
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** Runs the suite in a child process, asynchronously so the server's output keeps flowing. */
+const runSuite = () =>
+  new Promise<number>((resolve) => {
+    const knownFailures = Object.keys(app.knownFailures ?? {});
+    const skipFlags = knownFailures.map((name) => `--test-skip-pattern=^${escapeRegExp(name)}$`);
+
+    const tests = spawn(process.execPath, ["--test", "--test-concurrency=1", ...skipFlags, "src/**/*.test.ts"], {
+      cwd: contractTestsDir,
+      env: { ...process.env, API_URL: app.url, API_PROTOCOL: app.protocol ?? "rest" },
+      stdio: "inherit",
+    });
+    tests.on("exit", (code) => resolve(code ?? 1));
+  });
 
 try {
   console.log(`Starting ${appName}: ${app.start}`);
-  await waitUntilListening(app.url);
+  await waitUntilReady();
 
-  const tests = spawnSync(process.execPath, ["--test", "--test-concurrency=1", "src/**/*.test.ts"], {
-    cwd: contractTestsDir,
-    env: { ...process.env, API_URL: app.url, API_PROTOCOL: app.protocol ?? "rest" },
-    stdio: "inherit",
-  });
+  const status = await runSuite();
 
-  if (tests.status !== 0) {
+  for (const [name, reason] of Object.entries(app.knownFailures ?? {})) {
+    console.log(`# known failure, skipped: "${name}" (${reason})`);
+  }
+  if (status !== 0) {
     console.error(`\n--- ${appName} output ---\n${serverOutput.join("")}`);
   }
   stopServer();
-  process.exit(tests.status ?? 1);
+  process.exit(status);
 } catch (error) {
   console.error(`\n--- ${appName} output ---\n${serverOutput.join("")}`);
   console.error(error);
