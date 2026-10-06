@@ -1,0 +1,53 @@
+# The local Supabase stack behind typescript-supabase (`deno task supabase start`).
+#
+# Only what the API uses runs: Postgres, PostgREST behind the Kong gateway, and
+# the Edge Runtime. Everything else is switched off to save memory, so a second
+# Supabase project (python-supabase) can run on the same machine.
+# Settings that are not written here keep the CLI defaults; `supabase init`
+# prints them all, documented: https://supabase.com/docs/guides/local-development/cli/config
+
+# Names the Docker containers and volumes (supabase_db_cero-typescript, ...).
+project_id = "cero-typescript"
+
+[api]
+# Kong: http://127.0.0.1:54321/rest/v1 (PostgREST) and /functions/v1 (Edge Functions).
+port = 54321
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 17
+
+[db.pooler]
+enabled = false
+
+[db.seed]
+# The contract suite creates its own data; there is nothing to seed.
+enabled = false
+
+[edge_runtime]
+enabled = true
+
+# The API is public, as in every other stack: no Authorization header needed.
+# The function itself talks to the database with the service role key.
+[functions.api]
+verify_jwt = false
+
+# Not used by the API.
+[auth]
+enabled = false
+
+[studio]
+enabled = false
+
+[local_smtp]
+enabled = false
+
+[storage]
+enabled = false
+
+[realtime]
+enabled = false
+
+[analytics]
+enabled = false
