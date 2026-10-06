@@ -1,0 +1,50 @@
+# The local Supabase stack behind python-supabase (`npx supabase@2.120.0 start`).
+#
+# The API runs outside Supabase (FastAPI on port 8002) and only needs what
+# serves the database over HTTP: Postgres, and PostgREST behind the Kong
+# gateway. Everything else is switched off, and the ports are moved to the
+# 553xx block, so this stack runs next to typescript-supabase's (543xx).
+# Settings that are not written here keep the CLI defaults; `supabase init`
+# prints them all, documented: https://supabase.com/docs/guides/local-development/cli/config
+
+# Names the Docker containers and volumes (supabase_db_cero-python, ...).
+project_id = "cero-python"
+
+[api]
+# Kong: http://127.0.0.1:55321/rest/v1 is PostgREST, which supabase-py talks to.
+port = 55321
+
+[db]
+port = 55322
+shadow_port = 55320
+major_version = 17
+
+[db.pooler]
+enabled = false
+
+[db.seed]
+# The contract suite creates its own data; there is nothing to seed.
+enabled = false
+
+# Not used by the API: it runs in FastAPI, not in an Edge Function, and
+# reaches the database with the service role key, without signing anyone in.
+[edge_runtime]
+enabled = false
+
+[auth]
+enabled = false
+
+[studio]
+enabled = false
+
+[local_smtp]
+enabled = false
+
+[storage]
+enabled = false
+
+[realtime]
+enabled = false
+
+[analytics]
+enabled = false

@@ -7,6 +7,8 @@
   "typescript-supabase": {"cwd": "typescript-supabase", "start": "deno task start", "url": "http://127.0.0.1:54321/functions/v1/api", "ready": "/tasks"},
   "python-fastapi": {"cwd": "python-fastapi", "start": "uv run fastapi run", "url": "http://127.0.0.1:8000"},
   "python-graphql": {"cwd": "python-graphql", "start": "uv run cero-graphql", "url": "http://127.0.0.1:8001/graphql", "protocol": "graphql"},
+  "python-supabase": {"cwd": "python-supabase", "start": "npx --yes supabase@2.120.0 start && uv run fastapi run --port ${PORT:-8002}", "url": "http://127.0.0.1:8002"},
+  "python-firebase": {"cwd": "python-firebase/functions", "start": "uv venv --allow-existing venv && uv pip install --python venv -r requirements.txt && npx --yes firebase-tools@15 emulators:start --only functions,firestore --project demo-cero-python", "url": "http://127.0.0.1:5002/demo-cero-python/us-central1/api", "ready": "/tasks"},
   "go-gin": {"cwd": "go-gin", "start": "go run ./cmd/server", "url": "http://127.0.0.1:8080"},
   "go-fiber": {"cwd": "go-fiber", "start": "go run ./cmd/server", "url": "http://127.0.0.1:8081"},
   "rust-axum": {"cwd": "rust-axum", "start": "cargo run", "url": "http://127.0.0.1:8090"},

@@ -1,0 +1,24 @@
+{
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "runtime": "python313",
+      "ignore": ["venv", "__pycache__", "*.local", "firebase-debug.log", "firebase-debug.*.log"]
+    }
+  ],
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "emulators": {
+    "singleProjectMode": true,
+    "functions": { "host": "127.0.0.1", "port": 5002 },
+    "firestore": { "host": "127.0.0.1", "port": 8181, "websocketPort": 9181 },
+    "hub": { "host": "127.0.0.1", "port": 4410 },
+    "logging": { "host": "127.0.0.1", "port": 4510 },
+    "eventarc": { "host": "127.0.0.1", "port": 9281 },
+    "tasks": { "host": "127.0.0.1", "port": 9481 },
+    "ui": { "enabled": false }
+  }
+}

@@ -1,0 +1,15 @@
+# Firebase installs these into venv/ and runs the function from there.
+#
+# They are this repository's own packages, installed from source and editable,
+# so the emulator always runs the code of the workspace. Their third-party
+# dependencies (firebase-functions, FastAPI, google-cloud-firestore, ...) come
+# from their pyproject.toml files. pip reads the paths from the current folder:
+# run `pip install -r requirements.txt` here, in functions/.
+-e ../../shared/python-core
+-e ../../database/python-firestore
+# python-fastapi depends on its own storage adapters: they come along, unused.
+-e ../../database/python-postgres
+-e ../../database/python-mongodb
+-e ../../python-fastapi
+# python-firebase itself: the `cero_firebase` package that main.py exports from.
+-e ..

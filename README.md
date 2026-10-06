@@ -48,8 +48,8 @@ across languages.
 | [`typescript-supabase`](typescript-supabase) | Supabase Edge Function, Deno + Hono | Supabase Postgres (supabase-js) | 54321 | ✅ 58/58 |
 | [`python-fastapi`](python-fastapi) | FastAPI, Pydantic | Postgres (SQLAlchemy), MongoDB (PyMongo), memory | 8000 | ✅ 58/58 |
 | [`python-graphql`](python-graphql) | Strawberry, code-first | Postgres, MongoDB, memory | 8001 | ✅ 43/43 (GraphQL) |
-| [`python-supabase`](python-supabase) | FastAPI app over supabase-py | Supabase Postgres | 8002 | ⏳ |
-| [`python-firebase`](python-firebase) | Cloud Functions (Python) | Firestore (emulator) | 5002 | ⏳ |
+| [`python-supabase`](python-supabase) | The FastAPI app over supabase-py | Supabase Postgres (supabase-py) | 8002 | ✅ 58/58 |
+| [`python-firebase`](python-firebase) | Cloud Functions (Python) + the FastAPI app | Firestore (emulator) | 5002 | ✅ 58/58 |
 | [`go-gin`](go-gin) | Gin | Postgres (pgx), memory | 8080 | ✅ 58/58 |
 | [`go-fiber`](go-fiber) | Fiber v3 | Postgres (pgx), memory | 8081 | ✅ 58/58 |
 | [`rust-axum`](rust-axum) | Axum 0.8 | Postgres (sqlx), memory | 8090 | ✅ 58/58 |

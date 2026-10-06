@@ -3,7 +3,9 @@
 # `{ workspace = true }`. The root is virtual (it is not a package itself).
 #
 #   uv sync                 # installs every member and its dev tools
-#   uv run pytest           # every Python test (needs Postgres and MongoDB)
+#   uv run pytest           # every Python test (needs Postgres, MongoDB, python-supabase's
+#                           # Supabase stack and python-firebase's Firestore emulator;
+#                           # SKIP_DATABASE_TESTS=1 skips the tests that need them)
 #   uv run ruff check && uv run ruff format --check && uv run mypy
 
 [tool.uv.workspace]
@@ -11,8 +13,12 @@ members = [
     "shared/python-core",
     "database/python-postgres",
     "database/python-mongodb",
+    "database/python-supabase",
+    "database/python-firestore",
     "python-fastapi",
     "python-graphql",
+    "python-supabase",
+    "python-firebase",
 ]
 
 [dependency-groups]
@@ -54,8 +60,15 @@ files = [
     "shared/python-core",
     "database/python-postgres",
     "database/python-mongodb",
+    "database/python-supabase",
+    "database/python-firestore",
     "python-fastapi",
     "python-graphql",
+    "python-supabase",
+    # Not the whole folder: Firebase keeps a virtual environment in functions/venv.
+    "python-firebase/src",
+    "python-firebase/tests",
+    "python-firebase/functions/main.py",
 ]
 
 [[tool.mypy.overrides]]
@@ -73,6 +86,10 @@ testpaths = [
     "shared/python-core/tests",
     "database/python-postgres/tests",
     "database/python-mongodb/tests",
+    "database/python-supabase/tests",
+    "database/python-firestore/tests",
     "python-fastapi/tests",
     "python-graphql/tests",
+    "python-supabase/tests",
+    "python-firebase/tests",
 ]
