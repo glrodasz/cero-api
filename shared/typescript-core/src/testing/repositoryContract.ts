@@ -127,10 +127,13 @@ export const testRepositoryContract = (adapterName: string, createRepositories: 
 
     describe("focus sessions", () => {
       it("assigns an id on create and finds the session by it, pauses included", async () => {
+        // Task ids are storage-specific (ObjectId, UUID...), so the session refers to real tasks.
+        const first = await repositories.tasks.create(newTask());
+        const second = await repositories.tasks.create(newTask());
         const created = await repositories.focusSessions.create(
           newSession({
             status: "paused",
-            tasks: ["task-1", "task-2"],
+            tasks: [second.id, first.id],
             pauses: [{ id: "pause-1", startTime: 1_500, endTime: null, time: 0 }],
           }),
         );
