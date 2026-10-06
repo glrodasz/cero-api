@@ -1,0 +1,18 @@
+[package]
+name = "cero-postgres"
+version = "1.0.0"
+description = "Postgres storage for cero-core, built on sqlx."
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+async-trait.workspace = true
+cero-core.workspace = true
+sqlx.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+cero-core = { workspace = true, features = ["testing"] }
+tokio = { workspace = true, features = ["macros", "rt", "sync"] }
