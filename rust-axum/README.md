@@ -6,6 +6,34 @@ The Cero API on **Axum 0.8**, storing data in Postgres through
 Compare it with [`rust-actix`](../rust-actix): same core, same storage, only
 the framework changes.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  client(["HTTP client"]) --> app
+  subgraph transport["rust-axum"]
+    main["src/main.rs<br/>composition root"]
+    app["src/lib.rs<br/>app()"]
+    handlers["src/tasks.rs<br/>src/focus_sessions.rs"]
+    errors["src/http/error.rs<br/>ApiError: IntoResponse"]
+  end
+  subgraph core["shared/rust-core"]
+    services["TasksService<br/>FocusSessionsService"]
+    ports{{"repository traits"}}
+  end
+  pg[("cero_postgres<br/>database/rust-postgres")]
+  mem[("cero_core::in_memory<br/>in-memory")]
+  main -.->|"Services::new"| app
+  app --> handlers --> services --> ports
+  handlers -.->|"Err(ApiError)"| errors
+  ports --> pg & mem
+```
+
+1. `main.rs` reads `STORAGE` ([`src/config.rs`](src/config.rs): `postgres` by default, or `memory`), builds those repositories and passes `Services::new(...)` to `rust_axum::app`.
+2. Extractors pull `State`, `Path` and the body (`JsonBody<T>`, [`src/http/json_body.rs`](src/http/json_body.rs)) out of the request; the handler calls one service method.
+3. The service applies the rules of [`shared/rust-core`](../shared/rust-core) and reaches storage only through the repository traits.
+4. Handlers return `Result<_, ApiError>`; `ApiError` turns a `CoreError` into a 404, 400 or 500 `{ "message" }`.
+
 ## What this stack shows
 
 - **Handlers are plain async functions; their arguments are extractors.**

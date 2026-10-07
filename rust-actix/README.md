@@ -6,6 +6,34 @@ The Cero API on **Actix Web 4**, storing data in Postgres through
 Compare it with [`rust-axum`](../rust-axum): same core, same storage, only the
 framework changes.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  client(["HTTP client"]) --> app
+  subgraph transport["rust-actix"]
+    main["src/main.rs<br/>HttpServer + App"]
+    app["src/lib.rs<br/>configure()"]
+    handlers["src/tasks.rs<br/>src/focus_sessions.rs"]
+    errors["src/http/error.rs<br/>ApiError: ResponseError"]
+  end
+  subgraph core["shared/rust-core"]
+    services["TasksService<br/>FocusSessionsService"]
+    ports{{"repository traits"}}
+  end
+  pg[("cero_postgres<br/>database/rust-postgres")]
+  mem[("cero_core::in_memory<br/>in-memory")]
+  main -.->|"Services::new"| app
+  app --> handlers --> services --> ports
+  handlers -.->|"Err(ApiError)"| errors
+  ports --> pg & mem
+```
+
+1. `main.rs` reads `STORAGE` ([`src/config.rs`](src/config.rs): `postgres` by default, or `memory`), builds those repositories and registers `configure(Services::new(...))` on every worker's `App`.
+2. Handlers get their service as `web::Data` and the body through `web::Json` or `OptionalJson<T>` ([`src/http/json.rs`](src/http/json.rs)), then call one service method.
+3. The service applies the rules of [`shared/rust-core`](../shared/rust-core) and reaches storage only through the repository traits.
+4. Handlers return `Result<_, ApiError>`; `ApiError` turns a `CoreError` into a 404, 400 or 500 `{ "message" }`.
+
 ## What this stack shows
 
 - **Shared state is app data.** The services are registered with

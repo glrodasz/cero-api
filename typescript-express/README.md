@@ -3,6 +3,35 @@
 The Cero API on **Express 5**, storing data in MongoDB through
 [`@cero/mongoose`](../database/typescript-mongoose).
 
+## Architecture
+
+```mermaid
+flowchart LR
+  client(["HTTP client"]) --> router
+  subgraph transport["typescript-express"]
+    main["src/main.ts<br/>composition root"]
+    app["src/app.ts<br/>createApp"]
+    router["tasks.router.ts<br/>focusSessions.router.ts"]
+    errors["http/errors.ts<br/>error → 404 / 400"]
+  end
+  subgraph core["shared/typescript-core"]
+    services["TasksService<br/>FocusSessionsService"]
+    ports{{"repository ports"}}
+  end
+  mongo[("database/typescript-mongoose<br/>MongoDB")]
+  mem[("in-memory")]
+  main -.-> app -.-> router
+  router --> services --> ports
+  router -. throws .-> errors
+  ports --> mongo
+  ports --> mem
+```
+
+1. [`src/main.ts`](src/main.ts) opens the storage that `STORAGE` picks (`mongodb` or `memory`), builds the services with `createServices` and hands them to `createApp`.
+2. A router validates the request with zod ([`src/http/validation.ts`](src/http/validation.ts)) and calls one service method.
+3. The service applies the business rules and reads or writes through the repository ports.
+4. Whatever it throws reaches [`src/http/errors.ts`](src/http/errors.ts): `NotFoundError` → 404, `ValidationError` → 400.
+
 ## What this stack shows
 
 - **Express 5 forwards async errors.** Handlers are plain `async` functions with

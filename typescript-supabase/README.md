@@ -8,6 +8,32 @@ Supabase stack, with no Supabase account.
 This stack lives in the Deno world, not in the Yarn workspace: Deno runs the
 function, its tests and the Supabase CLI.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  client(["HTTP client"]) --> routes
+  subgraph transport["typescript-supabase (Deno)"]
+    index["functions/api/index.ts<br/>Deno.serve(app.fetch)"]
+    app["app.ts<br/>createApp (Hono, /api)"]
+    routes["tasks.routes.ts<br/>focusSessions.routes.ts"]
+    errors["http/errors.ts<br/>error → 404 / 400"]
+  end
+  subgraph core["shared/typescript-core"]
+    services["TasksService<br/>FocusSessionsService"]
+    ports{{"repository ports"}}
+  end
+  db[("database/typescript-supabase<br/>supabase-js → Supabase Postgres")]
+  index -.-> app -.-> routes
+  routes --> services --> ports --> db
+  routes -. throws .-> errors
+```
+
+1. [`supabase/functions/api/index.ts`](supabase/functions/api/index.ts) builds the services with `createServices` over `@cero/supabase` and hands `app.fetch` to `Deno.serve`; the import map is in [`deno.json`](supabase/functions/api/deno.json).
+2. A route validates the request with zod through `@hono/zod-validator` ([`http/validation.ts`](supabase/functions/api/http/validation.ts)) and calls one service method.
+3. The service applies the business rules through the repository ports; supabase-js turns them into PostgREST calls on the tables from [`supabase/migrations/`](supabase/migrations).
+4. Whatever it throws reaches [`http/errors.ts`](supabase/functions/api/http/errors.ts): `NotFoundError` → 404, `ValidationError` → 400.
+
 ## The Supabase paradigm
 
 ```

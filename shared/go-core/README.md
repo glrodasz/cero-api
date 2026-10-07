@@ -7,6 +7,31 @@ database, no third-party dependency: plain structs and functions.
 It ports the [TypeScript reference core](../typescript-core): same services,
 same 12 repository methods, same rules and canonical messages.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  transports(["go-gin · go-fiber"]) -.->|"repositories"| wiring
+  transports --> services
+  subgraph core["shared/go-core"]
+    wiring["services.go<br/>NewServices"]
+    services["tasks_service.go<br/>focus_sessions_service.go"]
+    domain["task.go<br/>focus_session.go"]
+    ports{{"task_repository.go<br/>focus_session_repository.go"}}
+    contract["coretest/<br/>RunRepositoryContract"]
+  end
+  mem[("memory/<br/>in-memory")]
+  pg[("database/go-postgres<br/>Postgres")]
+  wiring -.-> services
+  services --> domain & ports
+  mem & pg -->|"implement"| ports
+  contract -.->|"proves"| mem & pg
+```
+
+- A transport picks an adapter, passes its `Repositories` and a clock to `NewServices`, and calls the `TasksService` and `FocusSessionsService` it gets back.
+- Services apply the pure rules of the domain types and reach storage only through the two repository ports: no framework, no driver.
+- `coretest.RunRepositoryContract` runs the same cases against `memory/` and `database/go-postgres`, so either one can sit behind the ports.
+
 ## What this core shows
 
 - **Errors are values.** Use cases return a `*NotFoundError` or a

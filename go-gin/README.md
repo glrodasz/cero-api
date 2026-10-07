@@ -6,6 +6,34 @@ The Cero API on **Gin**, storing data in PostgreSQL through
 Compare it with [`go-fiber`](../go-fiber): same core, same storage, only the
 framework changes.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  client(["HTTP client"]) --> router
+  subgraph transport["go-gin"]
+    main["cmd/server/main.go<br/>composition root"]
+    router["internal/api/router.go<br/>NewRouter"]
+    handlers["tasks.go<br/>focus_sessions.go"]
+    errors["errors.go<br/>handleErrors"]
+  end
+  subgraph core["shared/go-core"]
+    services["TasksService<br/>FocusSessionsService"]
+    ports{{"repository ports"}}
+  end
+  pg[("database/go-postgres<br/>Postgres")]
+  mem[("go-core/memory<br/>in-memory")]
+  main -.->|"core.NewServices"| router
+  router --> handlers --> services --> ports
+  handlers -.->|"c.Error(err)"| errors
+  ports --> pg & mem
+```
+
+1. `main.go` reads `STORAGE` (`postgres` by default, or `memory`), opens those repositories and passes `core.NewServices(...)` to `api.NewRouter`.
+2. A handler binds the body with `c.ShouldBindJSON` and its `binding` tags ([`binding.go`](internal/api/binding.go)), then calls one service method.
+3. The service applies the rules of [`shared/go-core`](../shared/go-core) and reaches storage only through the repository ports.
+4. Errors go to `c.Error`; the `handleErrors` middleware turns them into a 404, 400 or 500 `{ "message" }`.
+
 ## What this stack shows
 
 - **Handlers record errors, one middleware answers them.** Gin handlers return

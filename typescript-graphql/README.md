@@ -8,6 +8,38 @@ Same core and storage as [`typescript-express`](../typescript-express); only
 the protocol changes. The schema is the shared
 [`schema.graphql`](../shared/graphql/schema.graphql), served at `/graphql`.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  client(["GraphQL client"]) --> resolvers
+  subgraph transport["typescript-graphql"]
+    main["src/main.ts<br/>node:http createServer"]
+    app["src/app.ts<br/>createApp (Yoga)"]
+    schema["src/schema.ts"]
+    resolvers["src/resolvers/"]
+    errors["src/errors.ts<br/>NOT_FOUND / BAD_USER_INPUT"]
+  end
+  sdl["shared/graphql<br/>@cero/graphql-schema"]
+  subgraph core["shared/typescript-core"]
+    services["TasksService<br/>FocusSessionsService"]
+    ports{{"repository ports"}}
+  end
+  mongo[("database/typescript-mongoose<br/>MongoDB")]
+  mem[("in-memory")]
+  main -.-> app -.-> schema -.-> resolvers
+  sdl -. typeDefs .-> schema
+  resolvers --> services --> ports
+  resolvers -. throws .-> errors
+  ports --> mongo
+  ports --> mem
+```
+
+1. [`src/main.ts`](src/main.ts) opens the storage that `STORAGE` picks (`mongodb` or `memory`), builds the services with `createServices` and mounts the Yoga app on `node:http`.
+2. Yoga validates the operation against the shared schema; the services are the context, so each resolver calls one service method.
+3. The service applies the business rules and reads or writes through the repository ports.
+4. Whatever it throws reaches [`src/errors.ts`](src/errors.ts): `NotFoundError` → `NOT_FOUND`, `ValidationError` → `BAD_USER_INPUT`.
+
 ## What this stack shows
 
 - **Schema-first.** The types come from the shared SDL (`@cero/graphql-schema`);

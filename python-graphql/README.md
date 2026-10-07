@@ -7,6 +7,37 @@ storing data in Postgres, MongoDB or memory (the same adapters as
 The schema is [`shared/graphql/schema.graphql`](../shared/graphql/schema.graphql),
 written here as Python types; a test proves the two are the same.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  client(["GraphQL client"]) --> app
+  subgraph transport["python-graphql"]
+    main["main.py<br/>composition root + uvicorn"]
+    app["app.py<br/>Starlette lifespan<br/>Route /graphql"]
+    schema["schema.py<br/>Strawberry resolvers<br/>(types · inputs · scalars)"]
+    errors["errors.py<br/>NOT_FOUND / BAD_USER_INPUT"]
+  end
+  subgraph core["shared/python-core"]
+    services["TasksService<br/>FocusSessionsService"]
+    ports{{"repository ports"}}
+  end
+  sdl[["shared/graphql/schema.graphql"]]
+  pg[("database/python-postgres<br/>Postgres")]
+  mongo[("database/python-mongodb<br/>MongoDB")]
+  mem[("in-memory")]
+  main -.-> app
+  app --> schema --> services --> ports
+  schema -. raises .-> errors
+  sdl -.->|"test_schema_parity"| schema
+  ports --> pg & mongo & mem
+```
+
+1. [`main.py`](src/cero_graphql/main.py) passes the opener that `STORAGE` picks (`postgres` by default, `mongodb` or `memory`) to `create_app` and serves it with uvicorn; the lifespan builds the services with `create_services`.
+2. `GraphQLApp` at `/graphql` hands each operation to a resolver in [`schema.py`](src/cero_graphql/schema.py), which calls one service method from `info.context`.
+3. The service applies the business rules and reads or writes through the repository ports.
+4. Whatever it raises reaches [`errors.py`](src/cero_graphql/errors.py): `NotFoundError` → `NOT_FOUND`, `ValidationError` → `BAD_USER_INPUT`, anything else is masked.
+
 ## What this stack shows
 
 - **Code first.** Types are dataclass-like classes and resolvers are typed

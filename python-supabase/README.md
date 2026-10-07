@@ -5,6 +5,35 @@ The Cero API on **Supabase**, in Python: the app of
 Postgres through [`cero-supabase`](../database/python-supabase). It runs on the
 local Supabase stack, with no Supabase account.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  client(["HTTP client"]) --> app
+  subgraph stack["python-supabase"]
+    main["main.py<br/>composition root"]
+    migrations["supabase/migrations/"]
+  end
+  subgraph fastapi["python-fastapi"]
+    app["create_app<br/>routers + errors.py"]
+  end
+  subgraph core["shared/python-core"]
+    services["TasksService<br/>FocusSessionsService"]
+    ports{{"repository ports"}}
+  end
+  db[("database/python-supabase<br/>Supabase Postgres (local stack)")]
+  main -.->|"create_app"| app
+  main -.->|"open_supabase_storage"| db
+  app --> services --> ports
+  ports -->|"supabase-py"| db
+  migrations -.-> db
+```
+
+1. [`main.py`](src/cero_supabase_api/main.py) passes `open_supabase_storage` (with `SUPABASE_URL` and the service role key) to `create_app`. There is no `STORAGE` switch: it is always Supabase.
+2. [python-fastapi](../python-fastapi)'s routers validate the request and call one service method.
+3. The service applies the business rules through the repository ports; supabase-py turns them into PostgREST calls on the tables from [`supabase/migrations/`](supabase/migrations).
+4. Whatever it raises reaches python-fastapi's `errors.py`: `NotFoundError` → 404, `ValidationError` → 400.
+
 ## The Supabase paradigm, from Python
 
 ```

@@ -7,6 +7,31 @@ framework, no database: plain types, traits and functions.
 It ports the [TypeScript reference core](../typescript-core): same services,
 same 12 repository methods, same rules, same canonical messages.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  transports(["rust-axum · rust-actix"]) -.->|"repositories"| wiring
+  transports --> services
+  subgraph core["shared/rust-core"]
+    wiring["src/lib.rs<br/>Services::new"]
+    services["src/tasks/service.rs<br/>src/focus_sessions/service.rs"]
+    domain["src/tasks/task.rs<br/>src/focus_sessions/focus_session.rs"]
+    ports{{"*/repository.rs<br/>repository traits"}}
+    contract["src/testing/<br/>repository_contract_tests!"]
+  end
+  mem[("src/in_memory.rs<br/>in-memory")]
+  pg[("database/rust-postgres<br/>Postgres")]
+  wiring -.-> services
+  services --> domain & ports
+  mem & pg -->|"implement"| ports
+  contract -.->|"proves"| mem & pg
+```
+
+- A transport picks an adapter, passes its `Repositories` to `Services::new`, and calls the `TasksService` and `FocusSessionsService` it gets back.
+- Services apply the pure rules of the domain types and reach storage only through the two repository traits: no framework, no driver.
+- `repository_contract_tests!` generates the same tests for `in_memory` and `database/rust-postgres`, so either one can sit behind the traits.
+
 ## What this crate shows
 
 - **Ports are traits behind `Arc<dyn …>`.** `TaskRepository` and

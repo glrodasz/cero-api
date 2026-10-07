@@ -22,6 +22,22 @@ src/
 └── testing/                 repository contract   → "@cero/core/testing"
 ```
 
+## Architecture
+
+```mermaid
+flowchart LR
+  transports(["typescript-express · fastify · nest · graphql · firebase · supabase"]) --> create["src/index.ts<br/>createServices"]
+  create --> services["TasksService<br/>FocusSessionsService"]
+  services --> domain["Task.ts<br/>FocusSession.ts"]
+  services --> ports{{"TaskRepository<br/>FocusSessionRepository"}}
+  adapters[("src/inMemory<br/>database/typescript-mongoose<br/>database/typescript-firestore<br/>database/typescript-supabase")] --> ports
+  contract["src/testing/repositoryContract.ts<br/>testRepositoryContract"] -. proves .-> adapters
+```
+
+1. A transport calls `createServices` with a set of repositories and gets the use cases back; `typescript-nest` builds the services itself.
+2. The services apply the rules from the domain files and talk to storage only through the repository ports; refusals are the errors in [`src/errors.ts`](src/errors.ts).
+3. Every adapter, the in-memory one included, implements the ports and passes `testRepositoryContract`.
+
 ## Using it
 
 ```ts
