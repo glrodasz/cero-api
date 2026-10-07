@@ -13,20 +13,19 @@ the tests that prove it, and, per language, the core every framework reuses.
 
 ## The layers
 
-```
-             ┌──────────────────────────────────────────────┐
-  transport  │ typescript-express  typescript-fastify  ...  │  routes, validation, HTTP status codes
-             └──────────────────────┬───────────────────────┘
-                                    │ calls
-             ┌──────────────────────▼───────────────────────┐
-  core       │ shared/<language>-core                       │  use cases (services), domain rules,
-             │   TasksService · FocusSessionsService        │  repository ports (interfaces),
-             │   TaskRepository · FocusSessionRepository    │  in-memory adapter
-             └──────────────────────▲───────────────────────┘
-                                    │ implements the ports
-             ┌──────────────────────┴───────────────────────┐
-  storage    │ database/<language>-<database>               │  MongoDB, Postgres, Firestore, Supabase
-             └──────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+  subgraph transport["transport · typescript-express, typescript-fastify, ..."]
+    t["routes, validation, HTTP status codes"]
+  end
+  subgraph core["core · shared/language-core"]
+    c["TasksService · FocusSessionsService<br/>TaskRepository · FocusSessionRepository (ports)<br/>in-memory adapter"]
+  end
+  subgraph storage["storage · database/language-database"]
+    s["MongoDB, Postgres, Firestore, Supabase"]
+  end
+  t -- calls --> c
+  s -. implements the ports .-> c
 ```
 
 - **The core knows nothing** about HTTP or databases. It is plain code you can
