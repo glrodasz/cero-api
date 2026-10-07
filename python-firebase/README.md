@@ -6,6 +6,35 @@ storing data in **Firestore** through
 [`cero-firestore`](../database/python-firestore). It runs locally on the
 Firebase Emulator Suite, with no Google account.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  client(["HTTP client"]) --> fn
+  subgraph stack["python-firebase"]
+    entry["functions/main.py<br/>exports api"]
+    fn["function.py<br/>@https_fn.on_request"]
+    bridge["asgi_bridge.py<br/>AsgiBridge (a2wsgi)<br/>WSGI → ASGI"]
+  end
+  subgraph fastapi["python-fastapi"]
+    app["create_app<br/>routers + errors.py"]
+  end
+  subgraph core["shared/python-core"]
+    services["TasksService<br/>FocusSessionsService"]
+    ports{{"repository ports"}}
+  end
+  db[("database/python-firestore<br/>Firestore emulator")]
+  entry -.-> fn
+  fn -.->|"open_firestore_storage"| db
+  fn -->|"Flask request"| bridge --> app
+  app --> services --> ports --> db
+```
+
+1. Firebase loads [`functions/main.py`](functions/main.py), which exports `api` from [`function.py`](src/cero_firebase/function.py), the composition root: `AsgiBridge(create_app(open_firestore_storage))`. There is no `STORAGE` switch: it is always Firestore.
+2. `api` gets a Flask (WSGI) request; [`AsgiBridge`](src/cero_firebase/asgi_bridge.py) runs it through [python-fastapi](../python-fastapi)'s ASGI app, whose routers validate it and call one service method.
+3. The service applies the business rules through the repository ports; `cero-firestore` reads and writes Firestore (the emulator, locally).
+4. Whatever it raises reaches python-fastapi's `errors.py`: `NotFoundError` → 404, `ValidationError` → 400.
+
 ## What this stack shows
 
 - **FastAPI inside a Flask function.** A Python HTTPS function

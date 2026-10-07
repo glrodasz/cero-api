@@ -7,6 +7,32 @@ It ports the [TypeScript reference core](../typescript-core): same services,
 same repository ports, same rules, same errors and messages. The words are the
 same; the idioms are Python's.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  transports(["python-fastapi · graphql · supabase · firebase"])
+  subgraph core["shared/python-core"]
+    compose["composition.py<br/>create_services"]
+    services["tasks/service.py<br/>focus_sessions/service.py"]
+    domain["task.py · focus_session.py<br/>pure rules"]
+    ports{{"tasks/repository.py<br/>focus_sessions/repository.py<br/>(Protocols)"}}
+    mem[("in_memory.py")]
+    contract["testing.py<br/>RepositoryContract"]
+  end
+  adapters[("database/python-postgres<br/>-mongodb · -firestore · -supabase")]
+  transports -.->|"at startup"| compose -.-> services
+  transports -->|"each request"| services
+  services --> domain
+  services --> ports
+  mem & adapters -.->|"implement"| ports
+  contract -.->|"proves"| mem & adapters
+```
+
+1. A transport's composition root passes an adapter's `Repositories` to `create_services` ([`composition.py`](src/cero_core/composition.py)) and keeps the `Services` it returns.
+2. Each request calls one service method: it reads through the ports, applies the pure rules, writes, and raises `NotFoundError` or `ValidationError` when it refuses.
+3. Adapters implement the ports without inheriting anything; [`RepositoryContract`](src/cero_core/testing.py) runs the same tests against each one, the in-memory adapter included.
+
 ## What this package shows
 
 - **Immutable entities.** `Task` and `FocusSession` are `@dataclass(frozen=True, slots=True)`

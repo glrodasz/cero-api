@@ -4,6 +4,35 @@ The Cero API on **FastAPI**, storing data in Postgres
 ([`cero-postgres`](../database/python-postgres)), MongoDB
 ([`cero-mongodb`](../database/python-mongodb)) or memory.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  client(["HTTP client"]) --> routers
+  subgraph transport["python-fastapi"]
+    main["main.py<br/>composition root"]
+    app["app.py<br/>create_app + lifespan"]
+    routers["tasks/router.py<br/>focus_sessions/router.py<br/>(Pydantic schemas)"]
+    errors["errors.py<br/>error → 404 / 400"]
+  end
+  subgraph core["shared/python-core"]
+    services["TasksService<br/>FocusSessionsService"]
+    ports{{"repository ports"}}
+  end
+  pg[("database/python-postgres<br/>Postgres")]
+  mongo[("database/python-mongodb<br/>MongoDB")]
+  mem[("in-memory")]
+  main -.-> app -.-> routers
+  routers --> services --> ports
+  routers -. raises .-> errors
+  ports --> pg & mongo & mem
+```
+
+1. [`main.py`](src/cero_fastapi/main.py) passes the opener that `STORAGE` picks (`postgres` by default, `mongodb` or `memory`; see [`storage.py`](src/cero_fastapi/storage.py)) to `create_app`, whose lifespan opens it and builds the services with `create_services`.
+2. A router validates the request with its Pydantic models and calls one service method, injected through [`dependencies.py`](src/cero_fastapi/dependencies.py).
+3. The service applies the business rules and reads or writes through the repository ports.
+4. Whatever it raises reaches [`errors.py`](src/cero_fastapi/errors.py): `NotFoundError` → 404, `ValidationError` → 400, as `{"message"}`.
+
 ## What this stack shows
 
 - **An app factory with a lifespan.** `create_app(open_storage)`
