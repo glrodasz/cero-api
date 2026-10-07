@@ -17,9 +17,6 @@ implementation serves **the same API** ([`shared/api-contract.md`](shared/api-co
 and passes **the same black-box test suite** ([`shared/contract-tests`](shared/contract-tests)),
 so they can be compared on one real problem.
 
-> ⚠️ [`cero-web`](https://github.com/glrodasz/cero-web) does not consume this
-> API yet; it still runs on `json-server` locally.
-
 ## How the code is organised
 
 Each language splits the work into three layers, so two frameworks of the same
