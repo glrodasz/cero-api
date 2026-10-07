@@ -4,6 +4,32 @@ The Cero API as a **Cloud Function for Firebase** (2nd gen), storing data in
 **Firestore** through [`@cero/firestore`](../database/typescript-firestore).
 It runs locally on the Firebase Emulator Suite, with no Google account.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  client(["HTTP client"]) --> fn
+  subgraph transport["typescript-firebase"]
+    fn["functions/src/index.ts<br/>onRequest"]
+    build["functions/build.ts<br/>esbuild → lib/"]
+  end
+  subgraph express["typescript-express"]
+    app["createApp<br/>typescript-express/app"]
+  end
+  subgraph core["shared/typescript-core"]
+    services["TasksService<br/>FocusSessionsService"]
+    ports{{"repository ports"}}
+  end
+  firestore[("database/typescript-firestore<br/>Firestore emulator")]
+  build -. bundles .-> fn
+  fn --> app --> services --> ports --> firestore
+```
+
+1. [`functions/src/index.ts`](functions/src/index.ts) builds the services with `createServices` over `createFirestoreRepositories` and hands them to `createApp`.
+2. That app is [`typescript-express`](../typescript-express)'s, unchanged: its routers validate with zod, call one service method and map errors to 404/400.
+3. The service applies the business rules through the repository ports, here backed by Firestore.
+4. [`functions/build.ts`](functions/build.ts) bundles it all into `functions/lib/`, which is what the emulator runs and Firebase deploys.
+
 ## What this stack shows
 
 - **Express inside a function.** An Express app is a request handler, and so

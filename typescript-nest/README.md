@@ -7,6 +7,36 @@ Compare it with [`typescript-express`](../typescript-express): same core, same
 storage, same HTTP server underneath; Nest adds modules and dependency injection
 on top.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  client(["HTTP client"]) --> controllers
+  subgraph transport["typescript-nest"]
+    main["src/main.ts<br/>AppModule.forRoot"]
+    storage["StorageModule<br/>storage.tokens.ts"]
+    modules["TasksModule<br/>FocusSessionsModule"]
+    controllers["controllers<br/>ValidationPipe + DTOs"]
+    filter["api-exception.filter.ts<br/>error → 404 / 400"]
+  end
+  subgraph core["shared/typescript-core"]
+    services["TasksService<br/>FocusSessionsService"]
+    ports{{"repository ports"}}
+  end
+  mongo[("database/typescript-mongoose<br/>MongoDB")]
+  mem[("in-memory")]
+  main -.-> storage -. "injects ports" .-> modules -.-> controllers
+  controllers --> services --> ports
+  controllers -. throws .-> filter
+  ports --> mongo
+  ports --> mem
+```
+
+1. [`src/main.ts`](src/main.ts) passes the config to `AppModule.forRoot` ([`src/app.module.ts`](src/app.module.ts)); `StorageModule` provides the ports for the storage that `STORAGE` picks (`mongodb` or `memory`).
+2. Each feature module builds its service with a factory provider from the injected ports; there is no `createServices` here.
+3. The global `ValidationPipe` checks the body against a class-validator DTO, then the controller calls one service method, which applies the rules through the ports.
+4. Whatever it throws reaches [`src/common/api-exception.filter.ts`](src/common/api-exception.filter.ts): `NotFoundError` → 404, `ValidationError` → 400.
+
 ## What this stack shows
 
 - **Modules and dependency injection.** Each feature is a module with a

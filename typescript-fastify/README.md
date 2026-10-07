@@ -6,6 +6,35 @@ The Cero API on **Fastify 5**, storing data in MongoDB through
 Compare it with [`typescript-express`](../typescript-express): same core, same
 storage, only the framework changes.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  client(["HTTP client"]) --> routes
+  subgraph transport["typescript-fastify"]
+    main["src/main.ts<br/>composition root"]
+    app["src/app.ts<br/>buildApp"]
+    routes["tasks.routes.ts<br/>focusSessions.routes.ts<br/>TypeBox schemas"]
+    errors["http/errors.ts<br/>error → 404 / 400"]
+  end
+  subgraph core["shared/typescript-core"]
+    services["TasksService<br/>FocusSessionsService"]
+    ports{{"repository ports"}}
+  end
+  mongo[("database/typescript-mongoose<br/>MongoDB")]
+  mem[("in-memory")]
+  main -.-> app -.-> routes
+  routes --> services --> ports
+  routes -. throws .-> errors
+  ports --> mongo
+  ports --> mem
+```
+
+1. [`src/main.ts`](src/main.ts) opens the storage that `STORAGE` picks (`mongodb` or `memory`), builds the services with `createServices` and hands them to `buildApp`, which registers one plugin per feature.
+2. Fastify validates the request against the route's TypeBox schema (with ajv), then the handler calls one service method.
+3. The service applies the business rules and reads or writes through the repository ports.
+4. Whatever it throws reaches [`src/http/errors.ts`](src/http/errors.ts): `NotFoundError` → 404, `ValidationError` → 400.
+
 ## What this stack shows
 
 - **Everything is a plugin.** Each feature is a plugin registered under a
