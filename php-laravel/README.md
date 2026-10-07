@@ -8,6 +8,34 @@ that hold the business rules, storage behind the models), built from Laravel's
 own pieces. It behaves exactly like [`shared/typescript-core`](../shared/typescript-core)
 and the [API contract](../shared/api-contract.md).
 
+## Architecture
+
+```mermaid
+flowchart LR
+  client(["HTTP client"]) --> index
+  subgraph http["HTTP layer"]
+    index["public/index.php"]
+    boot["bootstrap/app.php<br/>middleware, withExceptions"]
+    routes["routes/api.php"]
+    controllers["app/Http/Controllers<br/>+ app/Http/Requests"]
+    resources["app/Http/Resources"]
+  end
+  subgraph domain["domain"]
+    actions["app/Actions<br/>use cases"]
+    models["app/Models<br/>Eloquent"]
+  end
+  pg[("Postgres")]
+  index --> boot --> routes --> controllers --> actions --> models --> pg
+  controllers --> models
+  controllers --> resources
+  controllers -.->|"exceptions"| boot
+```
+
+1. `public/index.php` boots [`bootstrap/app.php`](bootstrap/app.php), which mounts `routes/api.php` at the root and adds the `EnsureJsonBodyIsValid` middleware.
+2. A FormRequest validates the body; the controller calls one Action (or the model, for plain reads and single-row changes) and answers with a Resource.
+3. Exceptions bubble up to `withExceptions` in `bootstrap/app.php`, which turns them into a 404, 400 or 500 `{ "message" }`.
+4. There is no shared core: Laravel is the only PHP framework here, so Actions and Models play its part (see [`shared/README.md`](../shared/README.md)).
+
 ## What this stack shows
 
 - **Routes at the root.** [`routes/api.php`](routes/api.php) is mounted without

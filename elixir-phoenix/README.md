@@ -18,6 +18,34 @@ They port [`shared/typescript-core`](../shared/typescript-core) rule for rule.
 > `mix phx.server`, the contract suite) and commit the `mix.lock` that
 > `mix setup` creates.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  client(["HTTP client"]) --> endpoint
+  app["lib/cero/application.ex<br/>supervision tree"]
+  subgraph web["lib/cero_web"]
+    endpoint["endpoint.ex<br/>json_body_parser.ex"]
+    router["router.ex"]
+    controllers["task_controller.ex<br/>focus_session_controller.ex"]
+    fallback["fallback_controller.ex"]
+  end
+  subgraph domain["lib/cero"]
+    contexts["tasks.ex<br/>focus_sessions.ex"]
+    schemas["tasks/task.ex<br/>focus_sessions/*.ex"]
+  end
+  repo[("lib/cero/repo.ex<br/>Postgres")]
+  app -.->|"starts"| endpoint
+  endpoint --> router --> controllers --> contexts --> repo
+  contexts --> schemas
+  controllers -.->|"action_fallback"| fallback
+```
+
+1. `application.ex` starts `Cero.Repo` and `CeroWeb.Endpoint`; the endpoint's plugs parse the JSON body and hand the request to `router.ex`.
+2. A controller keeps the fields it accepts ([`params.ex`](lib/cero_web/params.ex)), calls one context function and renders the result with its `*_json.ex` view.
+3. A context answers `{:error, ...}` on failure; `action_fallback` sends it to `fallback_controller.ex`, which renders a 404 or a 400.
+4. There is no shared core: Phoenix is the only Elixir framework here, so contexts (with `Ecto.Multi` for multi-row changes) play its part (see [`shared/README.md`](../shared/README.md)).
+
 ## What this stack shows
 
 - **Contexts hold the rules.** [`Cero.Tasks`](lib/cero/tasks.ex) and

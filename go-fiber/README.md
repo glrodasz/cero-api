@@ -6,6 +6,34 @@ The Cero API on **Fiber v3**, storing data in PostgreSQL through
 Compare it with [`go-gin`](../go-gin): same core, same storage, only the
 framework changes.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  client(["HTTP client"]) --> app
+  subgraph transport["go-fiber"]
+    main["cmd/server/main.go<br/>composition root"]
+    app["internal/api/app.go<br/>NewApp"]
+    handlers["tasks.go<br/>focus_sessions.go"]
+    errors["errors.go<br/>ErrorHandler"]
+  end
+  subgraph core["shared/go-core"]
+    services["TasksService<br/>FocusSessionsService"]
+    ports{{"repository ports"}}
+  end
+  pg[("database/go-postgres<br/>Postgres")]
+  mem[("go-core/memory<br/>in-memory")]
+  main -.->|"core.NewServices"| app
+  app --> handlers --> services --> ports
+  handlers -.->|"return err"| errors
+  ports --> pg & mem
+```
+
+1. `main.go` reads `STORAGE` (`postgres` by default, or `memory`), opens those repositories and passes `core.NewServices(...)` to `api.NewApp`.
+2. A handler binds the body with `c.Bind().JSON`, which runs the `validate` tags ([`binding.go`](internal/api/binding.go)), then calls one service method.
+3. The service applies the rules of [`shared/go-core`](../shared/go-core) and reaches storage only through the repository ports.
+4. Handlers return their errors; the app's `ErrorHandler` turns them into a 404, 400 or 500 `{ "message" }`.
+
 ## What this stack shows
 
 - **Handlers return errors.** Every handler is `func(fiber.Ctx) error`; what it
