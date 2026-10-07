@@ -1,0 +1,20 @@
+{
+  "name": "@cero/core",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Domain, business rules and repository ports of the Cero API, independent of any framework or database.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./in-memory": "./src/inMemory/index.ts",
+    "./testing": "./src/testing/repositoryContract.ts"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\"",
+    "typecheck": "tsc -p ."
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "typescript": "~6.0.3"
+  }
+}

@@ -1,0 +1,23 @@
+[project]
+name = "cero-firestore"
+version = "1.0.0"
+description = "Firestore storage for cero-core, built on google-cloud-firestore's async client."
+requires-python = ">=3.13"
+dependencies = [
+    "cero-core",
+    "google-api-core>=2.41.0",
+    "google-cloud-firestore>=2.34.0",
+]
+
+[dependency-groups]
+dev = [
+    "cero-core[testing]",
+    "httpx>=0.28.1",
+]
+
+[tool.uv.sources]
+cero-core = { workspace = true }
+
+[build-system]
+requires = ["uv_build>=0.12.23,<0.13"]
+build-backend = "uv_build"

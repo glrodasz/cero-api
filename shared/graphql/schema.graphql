@@ -1,0 +1,96 @@
+# The GraphQL face of the Cero API. Same behaviour as the REST contract
+# (../api-contract.md), expressed with queries and mutations.
+#
+# Errors follow the GraphQL convention: `errors[].extensions.code` is
+# NOT_FOUND (REST 404) or BAD_USER_INPUT (REST 400), with the same messages.
+
+"Epoch milliseconds. Timestamps overflow GraphQL's 32-bit Int, hence a scalar."
+scalar Millis
+
+enum TaskStatus {
+  IN_PROGRESS
+  PENDING
+  COMPLETED
+}
+
+enum FocusSessionStatus {
+  ACTIVE
+  PAUSED
+  FINISHED
+}
+
+type Task {
+  id: ID!
+  description: String!
+  "0 is the top of its status group."
+  priority: Int!
+  status: TaskStatus!
+  "The session the task is being worked on in, if any."
+  focusSessionId: ID
+}
+
+type Pause {
+  id: ID!
+  startTime: Millis!
+  "Null while the pause is open."
+  endTime: Millis
+  time: Millis!
+}
+
+type FocusSession {
+  id: ID!
+  status: FocusSessionStatus!
+  startTime: Millis!
+  "Ids of the tasks the session started with."
+  tasks: [ID!]!
+  "Oldest first; only the last one can be open."
+  pauses: [Pause!]!
+}
+
+type Query {
+  "Tasks of the current focus session, or every in-progress and pending task when there is none."
+  tasks: [Task!]!
+  "Null when the task does not exist."
+  task(id: ID!): Task
+  "Every focus session, oldest first."
+  focusSessions: [FocusSession!]!
+  "The newest active or paused session, with startTime moved forward by its closed pauses."
+  currentFocusSession: FocusSession
+}
+
+input CreateTaskInput {
+  description: String!
+}
+
+"Only the fields that are present are changed."
+input UpdateTaskInput {
+  description: String
+  priority: Int
+  status: TaskStatus
+  focusSessionId: ID
+}
+
+input StartFocusSessionInput {
+  "Defaults to every in-progress and pending task."
+  tasks: [ID!]
+  "Defaults to now."
+  startTime: Millis
+}
+
+type Mutation {
+  createTask(input: CreateTaskInput!): Task!
+  updateTask(id: ID!, input: UpdateTaskInput!): Task!
+  changeTaskStatus(id: ID!, status: TaskStatus!): Task!
+  completeTask(id: ID!): Task!
+  resetTask(id: ID!): Task!
+  deleteTask(id: ID!): Task!
+
+  startFocusSession(input: StartFocusSessionInput): FocusSession!
+  finishFocusSession(id: ID!): FocusSession!
+  finishCurrentFocusSession: FocusSession!
+  pauseFocusSession(id: ID!): FocusSession!
+  "Starts a new pause (closing any open one) when time is given; without time an already paused session is left as is."
+  pauseCurrentFocusSession(time: Millis): FocusSession!
+  resumeFocusSession(id: ID!): FocusSession!
+  resumeCurrentFocusSession: FocusSession!
+}

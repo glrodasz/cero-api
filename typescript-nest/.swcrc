@@ -1,0 +1,8 @@
+{
+  "$schema": "https://swc.rs/schema.json",
+  // The Nest CLI supplies the rest (decorator metadata, ES modules); this adds
+  // what the repository's import style needs: "./x.ts" is emitted as "./x.js".
+  "jsc": {
+    "rewriteRelativeImportExtensions": true
+  }
+}

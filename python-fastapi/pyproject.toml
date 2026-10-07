@@ -1,0 +1,33 @@
+[project]
+name = "cero-fastapi"
+version = "1.0.0"
+description = "The Cero API on FastAPI."
+requires-python = ">=3.13"
+dependencies = [
+    "cero-core",
+    "cero-mongodb",
+    "cero-postgres",
+    "fastapi[standard]>=0.142.2",
+    "pydantic>=2.13.5",
+    "pydantic-settings>=2.15.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+]
+
+[tool.uv.sources]
+cero-core = { workspace = true }
+cero-mongodb = { workspace = true }
+cero-postgres = { workspace = true }
+
+# `uv run fastapi run` (production) and `uv run fastapi dev` (reload) serve this app.
+[tool.fastapi]
+entrypoint = "cero_fastapi.main:app"
+
+[build-system]
+requires = ["uv_build>=0.12.23,<0.13"]
+build-backend = "uv_build"

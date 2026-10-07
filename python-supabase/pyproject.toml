@@ -1,0 +1,30 @@
+[project]
+name = "cero-supabase-api"
+version = "1.0.0"
+description = "The Cero API on Supabase: python-fastapi's app, storing data in Supabase Postgres through PostgREST."
+requires-python = ">=3.13"
+dependencies = [
+    "cero-fastapi",
+    "cero-supabase",
+    "pydantic>=2.13.5",
+    "pydantic-settings>=2.15.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+]
+
+[tool.uv.sources]
+cero-fastapi = { workspace = true }
+cero-supabase = { workspace = true }
+
+# `uv run fastapi run --port 8002` (production) and `uv run fastapi dev --port 8002` (reload) serve this app.
+[tool.fastapi]
+entrypoint = "cero_supabase_api.main:app"
+
+[build-system]
+requires = ["uv_build>=0.12.23,<0.13"]
+build-backend = "uv_build"

@@ -1,0 +1,18 @@
+{
+  "name": "@cero/supabase",
+  "version": "1.0.0",
+  "exports": "./src/mod.ts",
+  "imports": {
+    "@cero/core": "../../shared/typescript-core/src/index.ts",
+    "@cero/core/testing": "../../shared/typescript-core/src/testing/repositoryContract.ts",
+    "@supabase/supabase-js": "jsr:@supabase/supabase-js@^2.117.2"
+  },
+  "tasks": {
+    "test": "deno test --allow-net=127.0.0.1:54321 --allow-env=SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY",
+    "check": "deno check && deno lint && deno fmt --check"
+  },
+  "fmt": {
+    "lineWidth": 120,
+    "proseWrap": "preserve"
+  }
+}

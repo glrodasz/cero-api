@@ -1,0 +1,32 @@
+{
+  "tasks": {
+    "supabase": {
+      "description": "The Supabase CLI, pinned by deno.lock: deno task supabase <command>",
+      "command": "deno run --allow-all npm:supabase@2.120.0"
+    },
+    "start": {
+      "description": "Start the local stack, then follow the Edge Function's logs in the foreground",
+      "command": "deno task supabase start && docker logs --follow supabase_edge_runtime_cero-typescript"
+    },
+    "serve": {
+      "description": "Serve the Edge Function with hot reload (the stack must be running)",
+      "command": "deno task supabase functions serve"
+    },
+    "test": {
+      "description": "The Hono app's own tests, over the in-memory repositories",
+      "command": "deno test --config supabase/functions/api/deno.json supabase/functions/api"
+    },
+    "check": {
+      "description": "Type-check, lint and format-check the function",
+      "command": "deno check --config supabase/functions/api/deno.json supabase/functions/api && deno lint && deno fmt --check"
+    },
+    "gen:types": {
+      "description": "Regenerate the adapter's row types from the local database, after a migration",
+      "command": "deno task supabase gen types typescript --local --schema public > ../database/typescript-supabase/src/database.types.ts && deno fmt ../database/typescript-supabase/src/database.types.ts"
+    }
+  },
+  "fmt": {
+    "lineWidth": 120,
+    "proseWrap": "preserve"
+  }
+}

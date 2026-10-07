@@ -1,0 +1,16 @@
+{
+  "name": "@cero/contract-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Black-box tests that every implementation of the Cero API must pass.",
+  "type": "module",
+  "scripts": {
+    "suite": "node --test --test-concurrency=1 \"src/**/*.test.ts\"",
+    "contract": "node src/run.ts",
+    "typecheck": "tsc -p ."
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "typescript": "~6.0.3"
+  }
+}

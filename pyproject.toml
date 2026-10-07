@@ -1,0 +1,95 @@
+# The Python implementations form one uv workspace: a single lockfile and a
+# single virtual environment, with packages depending on each other through
+# `{ workspace = true }`. The root is virtual (it is not a package itself).
+#
+#   uv sync                 # installs every member and its dev tools
+#   uv run pytest           # every Python test (needs Postgres, MongoDB, python-supabase's
+#                           # Supabase stack and python-firebase's Firestore emulator;
+#                           # SKIP_DATABASE_TESTS=1 skips the tests that need them)
+#   uv run ruff check && uv run ruff format --check && uv run mypy
+
+[tool.uv.workspace]
+members = [
+    "shared/python-core",
+    "database/python-postgres",
+    "database/python-mongodb",
+    "database/python-supabase",
+    "database/python-firestore",
+    "python-fastapi",
+    "python-graphql",
+    "python-supabase",
+    "python-firebase",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=2.4.0",
+    "ruff>=0.16.10",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # pyflakes
+    "I",     # import sorting
+    "N",     # pep8 naming
+    "UP",    # modern syntax for the target Python
+    "B",     # likely bugs
+    "C4",    # comprehensions
+    "SIM",   # simplifications
+    "RET",   # return statements
+    "PIE",   # misc. lints
+    "PT",    # pytest style
+    "ASYNC", # async pitfalls
+    "RUF",   # ruff's own rules
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["cero_*"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+plugins = ["pydantic.mypy"]
+files = [
+    "shared/python-core",
+    "database/python-postgres",
+    "database/python-mongodb",
+    "database/python-supabase",
+    "database/python-firestore",
+    "python-fastapi",
+    "python-graphql",
+    "python-supabase",
+    # Not the whole folder: Firebase keeps a virtual environment in functions/venv.
+    "python-firebase/src",
+    "python-firebase/tests",
+    "python-firebase/functions/main.py",
+]
+
+[[tool.mypy.overrides]]
+# Strawberry types `@strawberry.field(description=...)` as returning Any.
+module = ["cero_graphql.schema"]
+disallow_untyped_decorators = false
+
+[tool.pytest]
+minversion = "9.0"
+addopts = ["--import-mode=importlib", "--strict-markers"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+asyncio_default_test_loop_scope = "function"
+testpaths = [
+    "shared/python-core/tests",
+    "database/python-postgres/tests",
+    "database/python-mongodb/tests",
+    "database/python-supabase/tests",
+    "database/python-firestore/tests",
+    "python-fastapi/tests",
+    "python-graphql/tests",
+    "python-supabase/tests",
+    "python-firebase/tests",
+]
