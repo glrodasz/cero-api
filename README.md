@@ -10,7 +10,7 @@
 
 [**Cero project**](https://github.com/glrodasz/cero) · [API contract](shared/api-contract.md) · [How it works](#how-it-works) · [Architecture](#architecture) · [Quick start](#quick-start)
 
-<img src="docs/assets/og-image.png" alt="Cero API — The backend of RETO · Cero a Producción. One API. 16 implementations. One black-box suite to prove it. TypeScript, Python, Go, Rust, PHP, Elixir. REST + GraphQL." width="860">
+<img src="docs/assets/og-image.png" alt="Cero API: the backend of RETO · Cero a Producción. One API. 16 implementations. One black-box suite to prove it. TypeScript, Python, Go, Rust, PHP, Elixir. REST + GraphQL." width="860">
 
 ## Why
 
@@ -120,7 +120,7 @@ storage adapters that implement its repository ports, and one thin transport
 folder per framework. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) draws the
 layers.
 
-**Tech stack** — Transport: Express 5, Fastify 5, NestJS, GraphQL Yoga, Hono,
+**Tech stack.** Transport: Express 5, Fastify 5, NestJS, GraphQL Yoga, Hono,
 FastAPI, Strawberry, Gin, Fiber, Axum, Actix Web, Laravel, Phoenix · Storage:
 MongoDB, PostgreSQL, Firestore, Supabase · Tooling: Yarn 4, uv, Go workspaces,
 Cargo, Docker Compose, Node's test runner.
