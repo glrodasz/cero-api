@@ -10,7 +10,7 @@
 
 [**Cero project**](https://github.com/glrodasz/cero) · [API contract](shared/api-contract.md) · [How it works](#how-it-works) · [Architecture](#architecture) · [Quick start](#quick-start)
 
-<img src="docs/assets/og-image.png" alt="Cero API: the backend of RETO · Cero a Producción. One API. 16 implementations. One black-box suite to prove it. TypeScript, Python, Go, Rust, PHP, Elixir. REST + GraphQL." width="860">
+<img src="docs/assets/og-image.png" alt="Cero API: the backend of RETO. One API. 16 implementations. One black-box suite to prove it. TypeScript, Python, Go, Rust, PHP, Elixir. REST + GraphQL." width="860">
 
 ## Why
 
