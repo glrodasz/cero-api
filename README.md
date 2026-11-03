@@ -1,4 +1,4 @@
-<img src="docs/assets/logo.svg" width="164" align="left" alt="Cero API logo: three stacked bars for the transport, core and storage layers, with { 0 } in the middle">
+<img src="docs/assets/logo.svg" width="164" align="left" alt="Cero API logo: three stacked layers on a purple tile, transport, core and storage, with { 0 } as the core">
 
 # Cero API
 
