@@ -8,17 +8,14 @@
 
 <br clear="left">
 
-[**Watch the series**](https://glrz.me/youtube-cero) · [API contract](shared/api-contract.md) · [How it works](#how-it-works) · [Architecture](#architecture) · [Quick start](#quick-start)
+[**Cero project**](https://github.com/glrodasz/cero) · [API contract](shared/api-contract.md) · [How it works](#how-it-works) · [Architecture](#architecture) · [Quick start](#quick-start)
 
-<img src="docs/assets/og-image.png" alt="Cero API — The backend of RETO · Cero a Producción. One API. 16 implementations. One black-box suite to prove it. TypeScript, Python, Go, Rust, PHP, Elixir. REST + GraphQL." width="860">
+<img src="docs/assets/og-image.png" alt="Cero API: the backend of RETO · Cero a Producción. One API. 16 implementations. One black-box suite to prove it. TypeScript, Python, Go, Rust, PHP, Elixir. REST + GraphQL." width="860">
 
 ## Why
 
-0️⃣ 🚀 **Cero a Producción** is a series of live coding sessions where we build
-**RETO**, a productivity app, from scratch to production — real decisions,
-failing tests, refactors and all. 📺 [YouTube](https://glrz.me/youtube-cero) ·
-🟣 [Twitch](https://glrz.me/stream) (live in 🇪🇸 Spanish, Tuesdays to Fridays).
-Part of the [Cero a Producción project](https://github.com/glrodasz/cero).
+Part of [Cero](https://github.com/glrodasz/cero), the project that builds
+**RETO**, a productivity app, from scratch to production.
 
 Framework comparisons usually stop at "hello world", where every stack looks the
 same. This repository is the **backend** of RETO (tasks and focus sessions)
@@ -29,7 +26,7 @@ black-box test suite** ([`shared/contract-tests`](shared/contract-tests)), so
 the differences you see between two stacks are the real ones.
 
 It is for developers choosing a stack, learning a new one by reading the same
-problem solved in a language they know, and anyone following the series.
+problem solved in a language they know, and anyone following the Cero project.
 
 ### Design principles
 
@@ -123,7 +120,7 @@ storage adapters that implement its repository ports, and one thin transport
 folder per framework. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) draws the
 layers.
 
-**Tech stack** — Transport: Express 5, Fastify 5, NestJS, GraphQL Yoga, Hono,
+**Tech stack.** Transport: Express 5, Fastify 5, NestJS, GraphQL Yoga, Hono,
 FastAPI, Strawberry, Gin, Fiber, Axum, Actix Web, Laravel, Phoenix · Storage:
 MongoDB, PostgreSQL, Firestore, Supabase · Tooling: Yarn 4, uv, Go workspaces,
 Cargo, Docker Compose, Node's test runner.
